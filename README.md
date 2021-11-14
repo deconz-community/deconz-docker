@@ -1,5 +1,3 @@
-# deCONZ-Docker
-=======
 ## deCONZ Docker Image
 
 This Docker image containerizes the deCONZ software from Dresden Elektronik, which controls a ZigBee network using a Conbee USB or RaspBee GPIO serial interface. This image runs deCONZ in "minimal" mode, for control of the ZigBee network via the WebUIs ("Wireless Light Control" and "Phoscon") and over the REST API and Websockets, and optionally runs a VNC server for viewing and interacting with the ZigBee mesh through the deCONZ UI.
@@ -10,10 +8,9 @@ Builds of this image are available on (and should be pulled from) Docker Hub, wi
 
 |Tag|Description|
 |---|-----------|
-|marthoc/deconz:latest|Latest release of deCONZ, stable or beta|
-|marthoc/deconz:stable|Stable releases of deCONZ only|
-|marthoc/deconz:version|Specific versions of deCONZ, use only if you wish to pin your version of deCONZ|
-|marthoc/deconz:arch-test|Test builds of this image, not for use by end users, only for developer testing!|
+|deconzcommunity/deconz:latest|Latest release of deCONZ, stable or beta|
+|deconzcommunity/deconz:stable|Stable releases of deCONZ only|
+|deconzcommunity/deconz:version|Specific versions of deCONZ, use only if you wish to pin your version of deCONZ|
 
 The "latest", "stable", and "version" tags have multiarch support for amd64, armv7, and arm64, so specifying any of these tags will pull the correct version for your architecture.
 
@@ -43,7 +40,7 @@ docker run -d \
     -v /etc/localtime:/etc/localtime:ro \
     -v /opt/deconz:/opt/deCONZ \
     --device=/dev/ttyUSB0 \
-    marthoc/deconz
+    deconzcommunity/deconz
 ```
 
 #### Command line Options
@@ -56,7 +53,7 @@ docker run -d \
 |`-v /etc/localtime:/etc/localtime:ro`|Ensure the container has the correct local time (alternatively, use the TZ environment variable, see below).|
 |`-v /opt/deconz:/opt/deCONZ`|Bind mount /opt/deconz (or the directory of your choice) into the container for persistent storage.|
 |`--device=/dev/ttyUSB0`|Pass the serial device at ttyUSB0 into the container for use by deCONZ (you may need to investigate which device name is assigned to your device depending on if you are also using other usb serial devices; by default ConBee = /dev/ttyUSB0, Conbee II = /dev/ttyACM0, RaspBee = /dev/ttyAMA0 or /dev/ttyS0).|
-|`marthoc/deconz`|This image uses a manifest list for multiarch support; specifying marthoc/deconz:latest or marthoc/deconz:stable will pull the correct version for your arch.|
+|`deconzcommunity/deconz`|This image uses a manifest list for multiarch support; specifying deconzcommunity/deconz:latest or deconzcommunity/deconz:stable will pull the correct version for your arch.|
 
 #### Environment Variables
 
@@ -92,7 +89,7 @@ A docker-compose.yml file is provided in the root of this image's GitHub repo. Y
 version: "2"
 services:
   deconz:
-    image: marthoc/deconz
+    image: deconzcommunity/deconz
     container_name: deconz
     network_mode: host
     restart: always
@@ -110,7 +107,7 @@ services:
       - DEBUG_OTAU=0
 ```
 
-Then, you can do `docker-compose pull` to pull the latest marthoc/deconz image, `docker-compose up -d` to start the deconz container service, and `docker-compose down` to stop the deconz service and delete the container. Note that these commands will also pull, start, and stop any other services defined in docker-compose.yml.
+Then, you can do `docker-compose pull` to pull the latest deconzcommunity/deconz image, `docker-compose up -d` to start the deconz container service, and `docker-compose down` to stop the deconz service and delete the container. Note that these commands will also pull, start, and stop any other services defined in docker-compose.yml.
 
 #### Running on Docker for Mac / Docker for Windows
 
@@ -126,7 +123,7 @@ docker run -d \
     --device=/dev/ttyUSB0 \
     -e DECONZ_WEB_PORT=80 \
     -e DECONZ_WS_PORT=443 \
-    marthoc/deconz
+    deconzcommunity/deconz
 ```
 
 ### Configuring Raspbian for RaspBee
@@ -183,18 +180,18 @@ docker-compose down
 
 ##### 3. Invoke the firmware update script: 
 ```bash
-docker run -it --rm --entrypoint "/firmware-update.sh" --privileged --cap-add=ALL -v /dev:/dev -v /lib/modules:/lib/modules -v /sys:/sys marthoc/deconz
+docker run -it --rm --entrypoint "/firmware-update.sh" --privileged --cap-add=ALL -v /dev:/dev -v /lib/modules:/lib/modules -v /sys:/sys deconzcommunity/deconz
 ```
 
 If you have multiple usb devices, you can map the `/dev/...` volume corresponding to your Conbee/Raspbee to avoid wrong path mapping. 
 
 ```bash
-docker run -it --rm --entrypoint "/firmware-update.sh" --privileged --cap-add=ALL -v /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DExxxxxxx-if00:/dev/ttyACM0  -v /lib/modules:/lib/modules -v /sys:/sys marthoc/deconz
+docker run -it --rm --entrypoint "/firmware-update.sh" --privileged --cap-add=ALL -v /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DExxxxxxx-if00:/dev/ttyACM0  -v /lib/modules:/lib/modules -v /sys:/sys deconzcommunity/deconz
 ```
 
 You could also put additional options to the end of this call:
 ```bash
-docker run ... marthoc/deconz [option1] [value1] [option2] [value2] ...
+docker run ... deconzcommunity/deconz [option1] [value1] [option2] [value2] ...
 ```
 If these are valid options for the flashing tool they will be added to the call:
 |Option|Description|Default (if any)|
@@ -262,18 +259,18 @@ Over-the-air update functionality is currently untested.
 
 ### Issues / Contributing
 
-Please raise any issues with this container at its GitHub repo: https://github.com/marthoc/docker-deconz. Please check the "Gotchas / Known Issues" section above before raising an Issue on GitHub in case the issue is already known.
+Please raise any issues with this container at its GitHub repo: https://github.com/deconzcommunity/docker-deconz. Please check the "Gotchas / Known Issues" section above before raising an Issue on GitHub in case the issue is already known.
 
 To contribute, please fork the GitHub repo, create a feature branch, and raise a Pull Request; for simple changes/fixes, it may be more effective to raise an Issue instead.
 
 ### Building Locally
 
-Pulling `marthoc/deconz` from Docker Hub is the recommended way to obtain this image. However, you can build this image locally by:
+Pulling `deconzcommunity/deconz` from Docker Hub is the recommended way to obtain this image. However, you can build this image locally by:
 
 ```bash
-git clone https://github.com/marthoc/docker-deconz.git
-cd docker-deconz
-docker build --build-arg VERSION=`[BUILD_VERSION]` --build-arg CHANNEL=`[BUILD_CHANNEL]` -t "[your-user/]deconz[:local]" ./[arch]
+git clone https://github.com/deconz-community/deCONZ-docker.git
+cd deCONZ-docker
+docker build --build-arg VERSION=`[BUILD_VERSION]` --build-arg CHANNEL=`[BUILD_CHANNEL]` -t "[your-user/]deconz[:local]" ./Docker/
 ```
 
 |Parameter|Description|
@@ -283,7 +280,6 @@ docker build --build-arg VERSION=`[BUILD_VERSION]` --build-arg CHANNEL=`[BUILD_C
 |`[your-user/]`|Your username (optional).|
 |`deconz`|The name you want the built Docker image to have on your system (default: deconz).|
 |`[local]`|Adds the tag `:local` to the image (to help differentiate between this image and your locally built image) (optional).|
-|`[arch]`|The architecture you want to build for (currently supported options: `amd64`, `armv7`, and `arm64`).|
 
 *Note: VERSION and CHANNEL are required arguments and the image will fail to build if they are not specified.*  
 
