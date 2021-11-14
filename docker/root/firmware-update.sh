@@ -110,7 +110,7 @@ function parse_options() {
 
 echo "-------------------------------------------------------------------"
 echo " "
-echo "             marthoc/deconz Firmware Flashing Script"
+echo "             deconzcommunity/deconz Firmware Flashing Script"
 echo " "
 echo "                       Version: $VERSION"
 echo " "

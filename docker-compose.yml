@@ -1,12 +1,12 @@
 version: "2"
 services: 
   deconz:
-    image: marthoc/deconz
+    image: deconzcommunity/deconz
     container_name: deconz
     network_mode: host
     restart: always
     volumes:
-      - /opt/deconz:/root/.local/share/dresden-elektronik/deCONZ
+      - /opt/deconz:/opt/deCONZ
     devices:
       - /dev/ttyUSB0
     environment:

@@ -4,10 +4,10 @@ if [ "$DECONZ_START_VERBOSE" = 1 ]; then
   set -x
 fi
 
-echo "[marthoc/deconz] Starting deCONZ..."
-echo "[marthoc/deconz] Current deCONZ version: $DECONZ_VERSION"
-echo "[marthoc/deconz] Web UI port: $DECONZ_WEB_PORT"
-echo "[marthoc/deconz] Websockets port: $DECONZ_WS_PORT"
+echo "[deconzcommunity/deconz] Starting deCONZ..."
+echo "[deconzcommunity/deconz] Current deCONZ version: $DECONZ_VERSION"
+echo "[deconzcommunity/deconz] Web UI port: $DECONZ_WEB_PORT"
+echo "[deconzcommunity/deconz] Websockets port: $DECONZ_WS_PORT"
 
 DECONZ_OPTS="--auto-connect=1 \
         --appdata=/opt/deCONZ/data \
@@ -20,7 +20,7 @@ DECONZ_OPTS="--auto-connect=1 \
         --http-port=$DECONZ_WEB_PORT \
         --ws-port=$DECONZ_WS_PORT"
 
-echo "[marthoc/deconz] Modifying user and group ID"
+echo "[deconzcommunity/deconz] Modifying user and group ID"
 if [ "$DECONZ_UID" != 1000 ]; then
   DECONZ_UID=${DECONZ_UID:-1000}
   sudo usermod -o -u "$DECONZ_UID" deconz
@@ -30,7 +30,7 @@ if [ "$DECONZ_GID" != 1000 ]; then
   sudo groupmod -o -g "$DECONZ_GID" deconz
 fi
 
-echo "[marthoc/deconz] Checking device group ID"
+echo "[deconzcommunity/deconz] Checking device group ID"
 if [ "$DECONZ_DEVICE" != 0 ]; then
   DEVICE=$DECONZ_DEVICE
 else
@@ -57,12 +57,12 @@ fi
 if [ "$DECONZ_VNC_MODE" != 0 ]; then
 
   if [ "$DECONZ_VNC_PORT" -lt 5900 ]; then
-    echo "[marthoc/deconz] ERROR - VNC port must be 5900 or greater!"
+    echo "[deconzcommunity/deconz] ERROR - VNC port must be 5900 or greater!"
     exit 1
   fi
 
   DECONZ_VNC_DISPLAY=:$(($DECONZ_VNC_PORT - 5900))
-  echo "[marthoc/deconz] VNC port: $DECONZ_VNC_PORT"
+  echo "[deconzcommunity/deconz] VNC port: $DECONZ_VNC_PORT"
 
   if [ ! -e /opt/deCONZ/vnc ]; then
     mkdir /opt/deCONZ/vnc
@@ -90,10 +90,10 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   export DISPLAY=$DECONZ_VNC_DISPLAY
 
   if [ "$DECONZ_NOVNC_PORT" = 0 ]; then
-    echo "[marthoc/deconz] noVNC Disabled"
+    echo "[deconzcommunity/deconz] noVNC Disabled"
   else
     if [ "$DECONZ_NOVNC_PORT" -lt 6080 ]; then
-      echo "[marthoc/deconz] ERROR - NOVNC port must be 6080 or greater!"
+      echo "[deconzcommunity/deconz] ERROR - NOVNC port must be 6080 or greater!"
       exit 1
     fi
 
@@ -102,7 +102,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
     if [ -f "$NOVNC_CERT" ]; then
       openssl x509 -noout -in "$NOVNC_CERT" -checkend 0 > /dev/null
       if [ $? != 0 ]; then
-        echo "[marthoc/deconz] The noVNC SSL certificate has expired; generating a new certificate now."
+        echo "[deconzcommunity/deconz] The noVNC SSL certificate has expired; generating a new certificate now."
         rm "$NOVNC_CERT"
       fi
     fi
@@ -114,11 +114,11 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
 
     #Start noVNC
     sudo -u deconz websockify -D --web=/usr/share/novnc/ --cert="$NOVNC_CERT" $DECONZ_NOVNC_PORT localhost:$DECONZ_VNC_PORT
-    echo "[marthoc/deconz] NOVNC port: $DECONZ_NOVNC_PORT"
+    echo "[deconzcommunity/deconz] NOVNC port: $DECONZ_NOVNC_PORT"
   fi
 
 else
-  echo "[marthoc/deconz] VNC Disabled"
+  echo "[deconzcommunity/deconz] VNC Disabled"
   DECONZ_OPTS="$DECONZ_OPTS -platform minimal"
 fi
 
