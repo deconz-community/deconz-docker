@@ -1,10 +1,10 @@
-FROM multiarch/qemu-user-static:aarch64 as qemu
-FROM arm64v8/debian:10.9-slim
-COPY --from=qemu /usr/bin/qemu-aarch64-static /usr/bin
+FROM debian:11.1-slim
 
 # Build arguments
 ARG VERSION
 ARG CHANNEL
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 
 # Runtime environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -57,6 +57,15 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Workaround required on amd64 to address issue #292
+RUN if [ "${TARGETPLATFORM}" = "linux/amd64" ] ; then \
+    apt-get update && \
+    apt-get install -y \
+        binutils && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    strip --remove-section=.note.ABI-tag /usr/lib/x86_64-linux-gnu/libQt5Core.so.5 ; fi
+
 # Add start.sh and Conbee udev data; set execute permissions
 COPY root /
 RUN chmod +x /start.sh && \
@@ -69,8 +78,11 @@ RUN groupadd -g ${DECONZ_GID} "deconz" && \
     mkdir -p /opt/deCONZ/vnc && \
     mkdir -p /opt/deCONZ/data
 
-# Add deCONZ, install deCONZ
-ADD http://deconz.dresden-elektronik.de/debian/${CHANNEL}/deconz_${DECONZ_VERSION}-debian-stretch-${CHANNEL}_arm64.deb /deconz.deb
+# Add deCONZ, install deCONZ, make OTAU dir
+COPY download-deconz.sh /
+
+RUN chmod +x /download-deconz.sh && /download-deconz.sh ${VERSION} ${CHANNEL} ${TARGETPLATFORM}
+
 RUN dpkg -i /deconz.deb && \
     chown root:root /usr/bin/deCONZ* && \
     setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/deCONZ && \
