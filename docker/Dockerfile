@@ -67,9 +67,9 @@ RUN chmod +x /start.sh && \
     chmod +x /firmware-update.sh
 
 # Add deCONZ, install deCONZ, make OTAU dir
-ADD download-deconz.sh /
+COPY download-deconz.sh /
 
-RUN /download-deconz.sh ${VERSION} ${CHANNEL} ${TARGETPLATFORM}
+RUN chmod +x /download-deconz.sh && /download-deconz.sh ${VERSION} ${CHANNEL} ${TARGETPLATFORM}
 
 RUN dpkg -i /deconz.deb && \
     rm -f /deconz.deb && \
