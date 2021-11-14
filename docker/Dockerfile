@@ -3,6 +3,8 @@ FROM debian:10.9-slim
 # Build arguments
 ARG VERSION
 ARG CHANNEL
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 
 # Runtime environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -52,12 +54,13 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Workaround required on amd64 to address issue #292
-RUN apt-get update && \
+RUN if [ "${TARGETPLATFORM}" = "linux/amd64" ] ; then \
+    apt-get update && \
     apt-get install -y \
         binutils && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    strip --remove-section=.note.ABI-tag /usr/lib/x86_64-linux-gnu/libQt5Core.so.5
+    strip --remove-section=.note.ABI-tag /usr/lib/x86_64-linux-gnu/libQt5Core.so.5 ; fi
 
 # Add start.sh and Conbee udev data; set execute permissions
 COPY root /
@@ -65,7 +68,10 @@ RUN chmod +x /start.sh && \
     chmod +x /firmware-update.sh
 
 # Add deCONZ, install deCONZ, make OTAU dir
-ADD http://deconz.dresden-elektronik.de/ubuntu/${CHANNEL}/deconz-${DECONZ_VERSION}-qt5.deb /deconz.deb
+COPY download-deconz.sh /
+
+RUN chmod +x /download-deconz.sh && /download-deconz.sh ${VERSION} ${CHANNEL} ${TARGETPLATFORM}
+
 RUN dpkg -i /deconz.deb && \
     rm -f /deconz.deb && \
     mkdir /root/otau && \
