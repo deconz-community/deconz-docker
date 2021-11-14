@@ -24,11 +24,15 @@ ENV DEBIAN_FRONTEND=noninteractive \
     DECONZ_VNC_PASSWORD_FILE=0 \
     DECONZ_VNC_PORT=5900 \
     DECONZ_NOVNC_PORT=6080 \
-    DECONZ_UPNP=1
+    DECONZ_UPNP=1 \
+    DECONZ_UID=1000 \
+    DECONZ_GID=1000 \
+    DECONZ_START_VERBOSE=0
 
 # Install deCONZ dependencies (except for WiringPi)
 RUN apt-get update && \
     apt-get install -y \
+        sudo \
         curl \
         kmod \
         libcap2-bin \
@@ -63,14 +67,21 @@ COPY root /
 RUN chmod +x /start.sh && \
     chmod +x /firmware-update.sh
 
-# Add deCONZ, install deCONZ, make OTAU dir
+# Make user
+RUN groupadd -g ${DECONZ_GID} "deconz" && \
+    useradd -u ${DECONZ_UID} -g "deconz" -G dialout -ms /bin/bash "deconz" && \
+    mkdir -p /opt/deCONZ/otau && \
+    mkdir -p /opt/deCONZ/vnc && \
+    mkdir -p /opt/deCONZ/data
+
+# Add deCONZ, install deCONZ
 ADD http://deconz.dresden-elektronik.de/raspbian/${CHANNEL}/deconz-${DECONZ_VERSION}-qt5.deb /deconz.deb
 RUN dpkg -i /deconz.deb && \
-    rm -f /deconz.deb && \
-    mkdir /root/otau && \
-    chown root:root /usr/bin/deCONZ*
+    chown root:root /usr/bin/deCONZ* && \
+    setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/deCONZ && \
+    rm -f /deconz.deb
 
-VOLUME [ "/root/.local/share/dresden-elektronik/deCONZ" ]
+VOLUME [ "/opt/deCONZ" ]
 
 EXPOSE ${DECONZ_WEB_PORT} ${DECONZ_WS_PORT} ${DECONZ_VNC_PORT} ${DECONZ_NOVNC_PORT}
 
