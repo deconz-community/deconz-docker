@@ -54,14 +54,13 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Workaround required on amd64 to address issue #292
-RUN if [ "${TARGETPLATFORM}" = "amd64" ] ; then \
+RUN if [ "${TARGETPLATFORM}" = "linux/amd64" ] ; then \
     apt-get update && \
     apt-get install -y \
         binutils && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    strip --remove-section=.note.ABI-tag /usr/lib/x86_64-linux-gnu/libQt5Core.so.5 \
-    fi
+    strip --remove-section=.note.ABI-tag /usr/lib/x86_64-linux-gnu/libQt5Core.so.5 ; fi
 
 # Add start.sh and Conbee udev data; set execute permissions
 COPY root /
