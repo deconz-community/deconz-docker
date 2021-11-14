@@ -54,7 +54,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Workaround required on amd64 to address issue #292
-RUN apt-get update && \
+RUN if echo "${TARGETPLATFORM}" | grep -q amd64 ; then apt-get update && \
     apt-get install -y \
         binutils && \
     apt-get clean && \
