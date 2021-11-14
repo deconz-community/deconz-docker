@@ -3,6 +3,8 @@ FROM debian:10.9-slim
 # Build arguments
 ARG VERSION
 ARG CHANNEL
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 
 # Runtime environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
