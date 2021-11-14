@@ -35,6 +35,7 @@ RUN apt-get update && \
         sudo \
         curl \
         kmod \
+	libatomic1 \
         libcap2-bin \
         libqt5core5a \
         libqt5gui5 \
