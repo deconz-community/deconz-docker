@@ -268,8 +268,8 @@ To contribute, please fork the GitHub repo, create a feature branch, and raise a
 Pulling `deconzcommunity/deconz` from Docker Hub is the recommended way to obtain this image. However, you can build this image locally by:
 
 ```bash
-git clone https://github.com/deconz-community/deCONZ-docker.git
-cd deCONZ-docker
+git clone https://github.com/deconz-community/deconz-docker.git
+cd deconz-docker
 docker build --build-arg VERSION=`[BUILD_VERSION]` --build-arg CHANNEL=`[BUILD_CHANNEL]` -t "[your-user/]deconz[:local]" ./Docker/
 ```
 
