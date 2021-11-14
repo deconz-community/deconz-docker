@@ -1,0 +1,75 @@
+---
+
+name: Docker images build
+
+on:
+  push:
+    branches: ['main']
+  workflow_dispatch:
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: standard
+            dockerfile: docker/Dockerfile
+            platforms: |-
+              linux/amd64
+              linux/arm/v7
+              linux/arm64
+            image_name: "docker-deconz"
+          - name: dev
+            dockerfile: docker/Dockerfile-dev
+            platforms: |-
+              linux/amd64
+              linux/arm64
+            image_name: "docker-deconz-dev"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: get version
+        id: version
+        uses: notiz-dev/github-action-json-property@release
+        with:
+            path: 'version.json'
+            prop_path: 'version'
+
+      - name: get channel
+        id: channel
+        uses: notiz-dev/github-action-json-property@release
+        with:
+            path: 'version.json'
+            prop_path: 'channel'
+
+      - name: Build and push ${{ matrix.name }}
+        uses: docker/build-push-action@v2
+        with:
+          context: ./docker/
+          file: ${{ matrix.dockerfile }}
+          platforms: ${{ matrix.platforms }}
+          build-args: |
+            VERSION=${{ steps.version.outputs.prop }}
+            CHANNEL=${{ steps.channel.outputs.prop }}
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USER }}/${{ matrix.image_name }}:latest
+            ${{ secrets.DOCKER_HUB_USER }}/${{ matrix.image_name }}:${{ steps.version.outputs.prop }}
+          labels: |
+            maintainer=${{ github.repository_owner }}
+            org.opencontainers.image.vendor=${{ github.repository_owner }}
+            org.opencontainers.image.revision=${{ github.sha }}
