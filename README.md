@@ -41,7 +41,7 @@ docker run -d \
     --net=host \
     --restart=always \
     -v /etc/localtime:/etc/localtime:ro \
-    -v /opt/deconz:/root/.local/share/dresden-elektronik/deCONZ \
+    -v /opt/deconz:/opt/deCONZ \
     --device=/dev/ttyUSB0 \
     marthoc/deconz
 ```
@@ -54,7 +54,7 @@ docker run -d \
 |`--net=host`|Uses host networking mode for proper uPNP functionality; by default, the web UIs and REST API listen on port 80 and the websockets service listens on port 443. If these ports conflict with other services on your host, you can change them through the environment variables DECONZ_WEB_PORT and DECONZ_WS_PORT described below.|
 |`--restart=always`|Start the container when Docker starts (i.e. on boot/reboot).|
 |`-v /etc/localtime:/etc/localtime:ro`|Ensure the container has the correct local time (alternatively, use the TZ environment variable, see below).|
-|`-v /opt/deconz:/root/.local/share/dresden-elektronik/deCONZ`|Bind mount /opt/deconz (or the directory of your choice) into the container for persistent storage.|
+|`-v /opt/deconz:/opt/deCONZ`|Bind mount /opt/deconz (or the directory of your choice) into the container for persistent storage.|
 |`--device=/dev/ttyUSB0`|Pass the serial device at ttyUSB0 into the container for use by deCONZ (you may need to investigate which device name is assigned to your device depending on if you are also using other usb serial devices; by default ConBee = /dev/ttyUSB0, Conbee II = /dev/ttyACM0, RaspBee = /dev/ttyAMA0 or /dev/ttyS0).|
 |`marthoc/deconz`|This image uses a manifest list for multiarch support; specifying marthoc/deconz:latest or marthoc/deconz:stable will pull the correct version for your arch.|
 
@@ -80,6 +80,9 @@ Use these environment variables to change the default behaviour of the container
 |`-e DECONZ_VNC_PASSWORD_FILE=/var/secrets/my_secret`|Per default this is disabled and DECONZ_VNC_PASSWORD is used. Details on creating secrets for use with Docker containers can be found in the [corresponding section from the official documentation](https://docs.docker.com/engine/swarm/secrets/) |
 |`-e DECONZ_NOVNC_PORT=6080`|Default port for noVNC is 6080; this option can be used to change this port; setting the port to `0` will disable the noVNC functionality|
 |`-e DECONZ_UPNP=0`|Set this option to 0 to disable uPNP, see: https://github.com/dresden-elektronik/deconz-rest-plugin/issues/274|
+|`-e DECONZ_UID=1000`|Set the user id of deCONZ volume|
+|`-e DECONZ_GID=1000`|Set the group id of deCONZ volume|
+|`-e DECONZ_START_VERBOSE=0`|Set this option to 0 to disable verbose of start script, set to 1 to enable `set -x` logging|
 
 #### Docker-Compose
 
@@ -94,7 +97,7 @@ services:
     network_mode: host
     restart: always
     volumes:
-      - /opt/deconz:/root/.local/share/dresden-elektronik/deCONZ
+      - /opt/deconz:/opt/deCONZ
     devices:
       - /dev/ttyUSB0
     environment:
@@ -119,7 +122,7 @@ docker run -d \
     -p 80:80 \
     -p 443:443 \
     --restart=always \
-    -v /opt/deconz:/root/.local/share/dresden-elektronik/deCONZ \
+    -v /opt/deconz:/opt/deCONZ \
     --device=/dev/ttyUSB0 \
     -e DECONZ_WEB_PORT=80 \
     -e DECONZ_WS_PORT=443 \

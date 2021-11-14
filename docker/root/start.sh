@@ -1,11 +1,16 @@
 #!/bin/sh
 
+if [ "$DECONZ_START_VERBOSE" = 1 ]; then
+  set -x
+fi
+
 echo "[marthoc/deconz] Starting deCONZ..."
 echo "[marthoc/deconz] Current deCONZ version: $DECONZ_VERSION"
 echo "[marthoc/deconz] Web UI port: $DECONZ_WEB_PORT"
 echo "[marthoc/deconz] Websockets port: $DECONZ_WS_PORT"
 
 DECONZ_OPTS="--auto-connect=1 \
+        --appdata=/opt/deCONZ/data \
         --dbg-info=$DEBUG_INFO \
         --dbg-aps=$DEBUG_APS \
         --dbg-zcl=$DEBUG_ZCL \
@@ -14,6 +19,40 @@ DECONZ_OPTS="--auto-connect=1 \
 	--dbg-error=$DEBUG_ERROR \
         --http-port=$DECONZ_WEB_PORT \
         --ws-port=$DECONZ_WS_PORT"
+
+echo "[marthoc/deconz] Modifying user and group ID"
+if [ "$DECONZ_UID" != 1000 ]; then
+  DECONZ_UID=${DECONZ_UID:-1000}
+  sudo usermod -o -u "$DECONZ_UID" deconz
+fi
+if [ "$DECONZ_GID" != 1000 ]; then
+  DECONZ_GID=${DECONZ_GID:-1000}
+  sudo groupmod -o -g "$DECONZ_GID" deconz
+fi
+
+echo "[marthoc/deconz] Checking device group ID"
+if [ "$DECONZ_DEVICE" != 0 ]; then
+  DEVICE=$DECONZ_DEVICE
+else
+ if [ -e /dev/ttyUSB0 ]; then
+   DEVICE=/dev/ttyUSB0
+ fi
+ if [ -e /dev/ttyACM0 ]; then
+   DEVICE=/dev/ttyACM0
+ fi
+ if [ -e /dev/ttyAMA0 ]; then
+   DEVICE=/dev/ttyAMA0
+ fi
+ if [ -e /dev/ttyS0 ]; then
+   DEVICE=/dev/ttyS0
+ fi
+fi
+
+DIALOUTGROUPID=$(stat --printf='%g' $DEVICE)
+DIALOUTGROUPID=${DIALOUTGROUPID:-20}
+if [ "$DIALOUTGROUPID" != 20 ]; then
+  sudo groupmod -o -g "$DIALOUTGROUPID" dialout
+fi
 
 if [ "$DECONZ_VNC_MODE" != 0 ]; then
 
@@ -25,23 +64,27 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   DECONZ_VNC_DISPLAY=:$(($DECONZ_VNC_PORT - 5900))
   echo "[marthoc/deconz] VNC port: $DECONZ_VNC_PORT"
 
-  if [ ! -e /root/.vnc ]; then
-    mkdir /root/.vnc
+  if [ ! -e /opt/deCONZ/vnc ]; then
+    mkdir /opt/deCONZ/vnc
   fi
+
+  sudo -u deconz ln -sf /opt/deCONZ/vnc /home/deconz/.vnc
+  chown deconz:deconz /opt/deCONZ -R
 
   # Set VNC password
   if [ "$DECONZ_VNC_PASSWORD_FILE" != 0 ] && [ -f "$DECONZ_VNC_PASSWORD_FILE" ]; then
       DECONZ_VNC_PASSWORD=$(cat $DECONZ_VNC_PASSWORD_FILE)
   fi
 
-  echo "$DECONZ_VNC_PASSWORD" | tigervncpasswd -f > /root/.vnc/passwd
-  chmod 600 /root/.vnc/passwd
+  echo "$DECONZ_VNC_PASSWORD" | tigervncpasswd -f > /opt/deCONZ/vnc/passwd
+  chmod 600 /opt/deCONZ/vnc/passwd
+  chown deconz:deconz /opt/deCONZ/vnc/passwd
 
   # Cleanup previous VNC session data
-  tigervncserver -kill "$DECONZ_VNC_DISPLAY"
+  sudo -u deconz tigervncserver -kill "$DECONZ_VNC_DISPLAY"
 
   # Set VNC security
-  tigervncserver -SecurityTypes VncAuth,TLSVnc "$DECONZ_VNC_DISPLAY"
+  sudo -u deconz tigervncserver -SecurityTypes VncAuth,TLSVnc "$DECONZ_VNC_DISPLAY"
 
   # Export VNC display variable
   export DISPLAY=$DECONZ_VNC_DISPLAY
@@ -55,7 +98,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
     fi
 
     # Assert valid SSL certificate
-    NOVNC_CERT="/root/.vnc/novnc.pem"
+    NOVNC_CERT="/opt/deCONZ/vnc/novnc.pem"
     if [ -f "$NOVNC_CERT" ]; then
       openssl x509 -noout -in "$NOVNC_CERT" -checkend 0 > /dev/null
       if [ $? != 0 ]; then
@@ -67,8 +110,10 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
       openssl req -x509 -nodes -newkey rsa:2048 -keyout "$NOVNC_CERT" -out "$NOVNC_CERT" -days 365 -subj "/CN=deconz"
     fi
 
+    chown deconz:deconz $NOVNC_CERT
+
     #Start noVNC
-    websockify -D --web=/usr/share/novnc/ --cert="$NOVNC_CERT" $DECONZ_NOVNC_PORT localhost:$DECONZ_VNC_PORT
+    sudo -u deconz websockify -D --web=/usr/share/novnc/ --cert="$NOVNC_CERT" $DECONZ_NOVNC_PORT localhost:$DECONZ_VNC_PORT
     echo "[marthoc/deconz] NOVNC port: $DECONZ_NOVNC_PORT"
   fi
 
@@ -85,4 +130,6 @@ if [ "$DECONZ_UPNP" != 1 ]; then
   DECONZ_OPTS="$DECONZ_OPTS --upnp=0"
 fi
 
-/usr/bin/deCONZ $DECONZ_OPTS
+chown deconz:deconz /opt/deCONZ -R
+
+sudo -u deconz /usr/bin/deCONZ $DECONZ_OPTS
