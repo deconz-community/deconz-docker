@@ -4,6 +4,8 @@ name: Docker images build
 
 on:
   push:
+    paths:
+      - 'docker/**'
     branches: ['main']
   workflow_dispatch:
 
