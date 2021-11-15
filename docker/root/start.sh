@@ -56,7 +56,7 @@ fi
 
 #workaround if the group of the device doesn't have any permissions
 GROUPPERMISSIONS=$(stat -c "%A" $DEVICE | cut -c 5-7)
-if [ "$GROUPPERMISSIONS" = "---"]; then
+if [ "$GROUPPERMISSIONS" = "---" ]; then
   sudo chmod g+rw $DEVICE
 fi
 
