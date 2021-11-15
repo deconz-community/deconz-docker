@@ -74,10 +74,7 @@ RUN chmod +x /start.sh && \
 
 # Make user
 RUN groupadd -g ${DECONZ_GID} "deconz" && \
-    useradd -u ${DECONZ_UID} -g "deconz" -G dialout -ms /bin/bash "deconz" && \
-    mkdir -p /opt/deCONZ/otau && \
-    mkdir -p /opt/deCONZ/vnc && \
-    mkdir -p /opt/deCONZ/data
+    useradd -u ${DECONZ_UID} -g "deconz" -G dialout -ms /bin/bash "deconz"
 
 # Add deCONZ, install deCONZ, make OTAU dir
 COPY download-deconz.sh /

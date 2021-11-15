@@ -130,6 +130,8 @@ if [ "$DECONZ_UPNP" != 1 ]; then
   DECONZ_OPTS="$DECONZ_OPTS --upnp=0"
 fi
 
+mkdir -p /opt/deCONZ/otau
+
 chown deconz:deconz /opt/deCONZ -R
 
 sudo -u deconz /usr/bin/deCONZ $DECONZ_OPTS
