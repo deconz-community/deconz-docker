@@ -8,7 +8,7 @@ PLATFORM=$3
 
 if echo "${PLATFORM}" | grep -qE "arm64";
 then
-  URL="http://deconz.dresden-elektronik.de/debian/${CHANNEL}/deconz${DEV}_${DECONZ_VERSION}-debian-stretch-${CHANNEL}_arm64.deb"
+  URL="http://deconz.dresden-elektronik.de/debian/${CHANNEL}/deconz${DEV}_${DECONZ_VERSION}-debian-buster-${CHANNEL}_arm64.deb"
 fi
 if echo "${PLATFORM}" | grep -qE "amd64";
 then
