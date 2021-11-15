@@ -1,12 +1,11 @@
 ## Notes on migration
 
-This container works as a drop-in replacement for `marthoc/deconz`, with one exception:
-- deCONZ no longer runs as root. The container path for the deCONZ files was changed from `/root/.local/share/dresden-elektronik/deCONZ` to `/opt/deCONZ`.
+This image is replacing the `marthoc/deconz` image.
 
-For migrating to the new container, follow these steps:
+If you are migrating an existing `marthoc/deconz` install to `deconzcommunity/deconz`, you MUST modify your configuration a bit. _Carefully_ follow these steps:
 
-- Change image from `marthoc/deconz` to `deconzcommunity/deconz`. Available tags can be found [here](https://hub.docker.com/r/deconzcommunity/deconz/tags).
-- Change the container mount point for deCONZ files from `/root/.local/share/dresden-elektronik/deCONZ` to `/opt/deCONZ`.
+1. Change the image from `marthoc/deconz` to `deconzcommunity/deconz`. Available tags can be found [here](https://hub.docker.com/r/deconzcommunity/deconz/tags).
+2. Change the container mount point for your existing deCONZ volume from `/root/.local/share/dresden-elektronik/deCONZ` to `/opt/deCONZ`.
 
 Pull the new image and start up.
 
