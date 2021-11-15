@@ -1,6 +1,6 @@
 ---
 
-name: Docker images build
+name: Main build and push
 
 on:
   push:
