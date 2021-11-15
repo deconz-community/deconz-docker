@@ -6,6 +6,7 @@ on:
   push:
     paths:
       - 'docker/**'
+      - 'version.json'
     branches: ['main']
   workflow_dispatch:
 
