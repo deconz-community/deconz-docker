@@ -1,3 +1,17 @@
+## Notes on migration ⚠️
+
+This container works as a drop-in replacement for `marthoc/deconz`, with one exception:
+- deCONZ no longer runs as root. The container path for the deCONZ files was changed from `/root/.local/share/dresden-elektronik/deCONZ` to `/opt/deCONZ`.
+
+For migrating to the new container, follow these steps:
+
+- Change image from `marthoc/deconz` to `deconzcommunity/deconz`. Available tags can be found [here](https://hub.docker.com/r/deconzcommunity/deconz/tags).
+- Change the container mount point for deCONZ files from `/root/.local/share/dresden-elektronik/deCONZ` to `/opt/deCONZ`.
+
+Pull the new image and start up.
+
+---
+
 ## deCONZ Docker Image
 
 This Docker image containerizes the deCONZ software from Dresden Elektronik, which controls a ZigBee network using a Conbee USB or RaspBee GPIO serial interface. This image runs deCONZ in "minimal" mode, for control of the ZigBee network via the WebUIs ("Wireless Light Control" and "Phoscon") and over the REST API and Websockets, and optionally runs a VNC server for viewing and interacting with the ZigBee mesh through the deCONZ UI.
