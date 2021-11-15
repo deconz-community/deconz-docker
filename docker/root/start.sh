@@ -54,6 +54,12 @@ if [ "$DIALOUTGROUPID" != 20 ]; then
   sudo groupmod -o -g "$DIALOUTGROUPID" dialout
 fi
 
+#workaround if the group of the device doesn't have any permissions
+GROUPPERMISSIONS=$(stat -c "%A" $DEVICE | cut -c 5-7)
+if [ "$GROUPPERMISSIONS" = "---" ]; then
+  sudo chmod g+rw $DEVICE
+fi
+
 if [ "$DECONZ_VNC_MODE" != 0 ]; then
 
   if [ "$DECONZ_VNC_PORT" -lt 5900 ]; then
