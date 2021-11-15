@@ -8,7 +8,7 @@ For migrating to the new container, follow these steps:
 1. Change image from `marthoc/deconz` to `deconzcommunity/deconz`. Available tags can be found [here](https://hub.docker.com/r/deconzcommunity/deconz/tags).
 2. Change the container mount point for deCONZ files from `/root/.local/share/dresden-elektronik/deCONZ` to `/opt/deCONZ`.
 
-Pull the new container and start up.
+Pull the new image and start up.
 
 ---
 
