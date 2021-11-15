@@ -1,12 +1,13 @@
-## Migration
-This container will work as a drop-in replacement for `marthoc/deconz`, with one exception: The deCONZ process now runs as an unprivileged user instead of root, so the container path for the deCONZ data had to be changed.
+## Notes on migration ⚠️
 
-The new mount point for the deCONZ files is `/opt/deCONZ`. In other words, the directory on your host containing `zll.db` needs to be mounted on `/opt/deCONZ`.
+This container works as a drop-in replacement for `marthoc/deconz`, with one exception: The deCONZ process no longer runs as root. The container path for the deCONZ files have been changed to `/opt/deCONZ`.
 
-To start using the new container, follow these steps:
+For migrating to the new container, follow these steps:
 
-1. Container name is now `deconzcommunity/deconz`. Update your config accordingly. Available tags can be found [here](https://hub.docker.com/r/deconzcommunity/deconz/tags).
-2. Container mount point for deCONZ files is now `/opt/deCONZ`. Update your config accordingly. Make sure that you pass along the directory that contains `zll.db`.
+1. Change image from `marthoc/deconz` to `deconzcommunity/deconz`. Available tags can be found [here](https://hub.docker.com/r/deconzcommunity/deconz/tags).
+2. Change the container mount point for deCONZ files from `/root/.local/share/dresden-elektronik/deCONZ` to `/opt/deCONZ`.
+
+Pull the new container and start up.
 
 ---
 
