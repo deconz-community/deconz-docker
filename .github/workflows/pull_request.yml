@@ -4,6 +4,8 @@ name: Docker images build
 
 on:
   pull_request:
+    paths:
+      - 'docker/**'
   workflow_dispatch:
 
 jobs:
