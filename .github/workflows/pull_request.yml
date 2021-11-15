@@ -1,6 +1,6 @@
 ---
 
-name: Docker images build
+name: Pull Request build
 
 on:
   pull_request:
