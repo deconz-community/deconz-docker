@@ -1,6 +1,7 @@
 ## Notes on migration ⚠️
 
-This container works as a drop-in replacement for `marthoc/deconz`, with one exception: The deCONZ process no longer runs as root. The container path for the deCONZ files have been changed to `/opt/deCONZ`.
+This container works as a drop-in replacement for `marthoc/deconz`, with one exception:
+- The deCONZ process no longer runs as root, so the container path for the deCONZ files changed from `/root/.local/share/dresden-elektronik/deCONZ` to `/opt/deCONZ`.
 
 For migrating to the new container, follow these steps:
 
