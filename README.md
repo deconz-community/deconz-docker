@@ -1,3 +1,15 @@
+## Migration
+This container will work as a drop-in replacement for `marthoc/deconz`, with one exception: The deCONZ process now runs as an unprivileged user instead of root, so the container path for the deCONZ data had to be changed.
+
+The new mount point for the deCONZ files is `/opt/deCONZ`. In other words, the directory on your host containing `zll.db` needs to be mounted on `/opt/deCONZ`.
+
+To start using the new container, follow these steps:
+
+1. Container name is now `deconzcommunity/deconz`. Update your config accordingly. Available tags can be found [here](https://hub.docker.com/r/deconzcommunity/deconz/tags).
+2. Container mount point for deCONZ files is now `/opt/deCONZ`. Update your config accordingly. Make sure that you pass along the directory that contains `zll.db`.
+
+---
+
 ## deCONZ Docker Image
 
 This Docker image containerizes the deCONZ software from Dresden Elektronik, which controls a ZigBee network using a Conbee USB or RaspBee GPIO serial interface. This image runs deCONZ in "minimal" mode, for control of the ZigBee network via the WebUIs ("Wireless Light Control" and "Phoscon") and over the REST API and Websockets, and optionally runs a VNC server for viewing and interacting with the ZigBee mesh through the deCONZ UI.
