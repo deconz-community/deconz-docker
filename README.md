@@ -109,8 +109,10 @@ services:
   deconz:
     image: deconzcommunity/deconz
     container_name: deconz
-    network_mode: host
     restart: always
+    ports: 
+      - 80:80
+      - 443:443
     volumes:
       - /opt/deconz:/opt/deCONZ
     devices:
