@@ -53,8 +53,9 @@ sudo apt install wiringpi
 ```bash
 docker run -d \
     --name=deconz \
-    --net=host \
     --restart=always \
+    -p 80:80 \
+    -p 443:443 \
     -v /etc/localtime:/etc/localtime:ro \
     -v /opt/deconz:/opt/deCONZ \
     --device=/dev/ttyUSB0 \
