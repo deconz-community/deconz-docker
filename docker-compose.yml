@@ -10,6 +10,7 @@ services:
     devices:
       - /dev/ttyUSB0
     environment:
+      - TZ=Eruope/Brussels
       - DECONZ_WEB_PORT=80
       - DECONZ_WS_PORT=443
       - DEBUG_INFO=1
@@ -17,3 +18,10 @@ services:
       - DEBUG_ZCL=0
       - DEBUG_ZDP=0
       - DEBUG_OTAU=0
+      - DECONZ_DEVICE=/dev/ttyUSB0
+      - DECONZ_VNC_MODE=1
+      - DECONZ_VNC_PORT=5900
+      - DECONZ_VNC_PASSWORD=changeme
+      - DECONZ_UID=1000
+      - DECONZ_GID=1000
+      - DECONZ_START_VERBOSE=0
