@@ -74,9 +74,6 @@ jobs:
             deconzcommunity/deconz:latest
             deconzcommunity/deconz:${{ steps.version.outputs.prop }}
             deconzcommunity/deconz:${{ steps.channel.outputs.prop }}
-            ghcr.io/deconzcommunity/deconz:latest
-            ghcr.io/deconzcommunity/deconz:${{ steps.version.outputs.prop }}
-            ghcr.io/deconzcommunity/deconz:${{ steps.channel.outputs.prop }}
           labels: |
             maintainer=${{ github.repository_owner }}
             org.opencontainers.image.vendor=${{ github.repository_owner }}
