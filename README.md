@@ -17,17 +17,22 @@ This Docker image containerizes the deCONZ software from Dresden Elektronik, whi
 
 Conbee is supported on `amd64`, `armhf`/`armv7`, and `aarch64`/`arm64` (i.e. RaspberryPi 2/3B/3B+, and other arm64 boards) architectures; RaspBee is supported on `armhf`/`armv7` and `aarch64`/`arm64` (and see the "Configuring Raspbian for RaspBee" section below for instructions to configure Raspbian to allow access to the RaspBee serial hardware).
 
-Builds of this image are available on (and should be pulled from) Docker Hub, with the following tags:
+Builds of this image are available on (and should be pulled from) Docker Hub or Github Container Registry, with the following tags:
 
 |Tag|Description|
 |---|-----------|
-|deconzcommunity/deconz:latest|Latest release of deCONZ, stable or beta|
-|deconzcommunity/deconz:stable|Stable releases of deCONZ only|
-|deconzcommunity/deconz:version|Specific versions of deCONZ, use only if you wish to pin your version of deCONZ|
+|latest|Latest release of deCONZ, stable or beta|
+|stable|Stable releases of deCONZ only|
+|version|Specific versions of deCONZ, use only if you wish to pin your version of deCONZ|
 
 The "latest", "stable", and "version" tags have multiarch support for amd64, armv7, and arm64, so specifying any of these tags will pull the correct version for your architecture.
 
-Please consult Docker Hub for the latest available versions of this image.
+Please consult Docker Hub or Github Container Registry for the latest available versions of this image.
+
+### Registries
+
+Docker Hub: `docker pull deconzcommunity/deconz:latest`
+Github Container Registry: `docker pull ghcr.io/deconz-community/deconz-docker:latest`, more info on can be found [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)
 
 ### Running the deCONZ Container
 
