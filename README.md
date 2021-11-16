@@ -32,8 +32,8 @@ Please consult Docker Hub or Github Container Registry for the latest available 
 
 ### Registries
 
-Docker Hub: `docker pull deconzcommunity/deconz:latest`
-Github Container Registry: `docker pull ghcr.io/deconz-community/deconz-docker:latest`, more info on can be found [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)
+- Docker Hub: `docker pull deconzcommunity/deconz:latest`
+- Github Container Registry: `docker pull ghcr.io/deconz-community/deconz-docker:latest`, more info on can be found [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)
 
 ### Running the deCONZ Container
 
