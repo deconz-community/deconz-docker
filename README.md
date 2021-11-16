@@ -24,6 +24,7 @@ Builds of this image are available on (and should be pulled from) Docker Hub or 
 |---|-----------|
 |latest|Latest release of deCONZ, stable or beta|
 |stable|Stable releases of deCONZ only|
+|beta|Beta releases of deCONZ only|
 |version|Specific versions of deCONZ, use only if you wish to pin your version of deCONZ|
 
 The "latest", "stable", and "version" tags have multiarch support for amd64, armv7, and arm64, so specifying any of these tags will pull the correct version for your architecture.
