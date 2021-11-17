@@ -97,4 +97,4 @@ jobs:
             org.opencontainers.image.vendor=${{ github.repository_owner }}
             org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
