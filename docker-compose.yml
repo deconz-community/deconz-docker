@@ -12,7 +12,7 @@ services:
     devices:
       - /dev/ttyUSB0
     environment:
-      - TZ=Eruope/Brussels
+      - TZ=Europe/Brussels
       - DECONZ_WEB_PORT=80
       - DECONZ_WS_PORT=443
       - DEBUG_INFO=1
