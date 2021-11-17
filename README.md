@@ -18,17 +18,23 @@ This Docker image containerizes the deCONZ software from Dresden Elektronik, whi
 
 Conbee is supported on `amd64`, `armhf`/`armv7`, and `aarch64`/`arm64` (i.e. RaspberryPi 2/3B/3B+, and other arm64 boards) architectures; RaspBee is supported on `armhf`/`armv7` and `aarch64`/`arm64` (and see the "Configuring Raspbian for RaspBee" section below for instructions to configure Raspbian to allow access to the RaspBee serial hardware).
 
-Builds of this image are available on (and should be pulled from) Docker Hub, with the following tags:
+Builds of this image are available on (and should be pulled from) Docker Hub or Github Container Registry, with the following tags:
 
 |Tag|Description|
 |---|-----------|
-|deconzcommunity/deconz:latest|Latest release of deCONZ, stable or beta|
-|deconzcommunity/deconz:stable|Stable releases of deCONZ only|
-|deconzcommunity/deconz:version|Specific versions of deCONZ, use only if you wish to pin your version of deCONZ|
+|latest|Latest release of deCONZ, stable or beta|
+|stable|Stable releases of deCONZ only|
+|beta|Beta releases of deCONZ only|
+|version|Specific versions of deCONZ, use only if you wish to pin your version of deCONZ, eg 2.13.02|
 
 The "latest", "stable", and "version" tags have multiarch support for amd64, armv7, and arm64, so specifying any of these tags will pull the correct version for your architecture.
 
-Please consult Docker Hub for the latest available versions of this image.
+Please consult Docker Hub or Github Container Registry for the latest available versions of this image.
+
+### Registries
+
+- Docker Hub: `docker pull deconzcommunity/deconz:latest`
+- Github Container Registry: `docker pull ghcr.io/deconz-community/deconz-docker:latest`, more info on can be found [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)
 
 ### Running the deCONZ Container
 
@@ -49,8 +55,9 @@ sudo apt install wiringpi
 ```bash
 docker run -d \
     --name=deconz \
-    --net=host \
     --restart=always \
+    -p 80:80 \
+    -p 443:443 \
     -v /etc/localtime:/etc/localtime:ro \
     -v /opt/deconz:/opt/deCONZ \
     --device=/dev/ttyUSB0 \
@@ -97,7 +104,7 @@ Use these environment variables to change the default behaviour of the container
 
 #### Docker-Compose
 
-A docker-compose.yml file is provided in the root of this image's GitHub repo. You may also copy/paste the following into your existing docker-compose.yml, modifying the options as required (omit the `version` and `services` lines as your docker-compose.yml will already contain these).
+A full docker-compose.yml file is provided in the root of this image's GitHub repo. You may also copy/paste the following into your existing docker-compose.yml, modifying the options as required (omit the `version` and `services` lines as your docker-compose.yml will already contain these).
 
 ```yaml
 version: "2"
@@ -105,8 +112,10 @@ services:
   deconz:
     image: deconzcommunity/deconz
     container_name: deconz
-    network_mode: host
     restart: always
+    ports: 
+      - 80:80
+      - 443:443
     volumes:
       - /opt/deconz:/opt/deCONZ
     devices:
