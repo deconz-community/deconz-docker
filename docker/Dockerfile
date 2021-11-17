@@ -88,6 +88,7 @@ RUN dpkg -i /deconz.deb && \
 
 VOLUME [ "/opt/deCONZ" ]
 
+# Healthcheck for web port of Phoscon app
 HEALTHCHECK --interval=10s --timeout=20s --retries=5 CMD curl -I 127.0.0.1:${DECONZ_WEB_PORT} || exit 1
 
 EXPOSE ${DECONZ_WEB_PORT} ${DECONZ_WS_PORT} ${DECONZ_VNC_PORT} ${DECONZ_NOVNC_PORT}
