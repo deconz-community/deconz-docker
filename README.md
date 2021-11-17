@@ -132,6 +132,10 @@ services:
 
 Then, you can do `docker-compose pull` to pull the latest deconzcommunity/deconz image, `docker-compose up -d` to start the deconz container service, and `docker-compose down` to stop the deconz service and delete the container. Note that these commands will also pull, start, and stop any other services defined in docker-compose.yml.
 
+#### Healthcheck for container status
+
+Healthcheck is used for checking Phoscon web app port for detect current healthy state of the running deconz container.
+
 #### Running on Docker for Mac / Docker for Windows
 
 The `--net=host` option is not yet supported on Mac/Windows. To run this container on those platforms, explicitly specify the ports in the run command and omit `--net=host`:
