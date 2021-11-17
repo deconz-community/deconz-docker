@@ -6,7 +6,7 @@ If you are migrating an existing `marthoc/deconz` install to `deconzcommunity/de
 
 1. Make sure you have the latest backup from the Phoscon.
 2. Change the image from `marthoc/deconz` to `deconzcommunity/deconz`. Available tags can be found [here](https://hub.docker.com/r/deconzcommunity/deconz/tags).
-3. Change the container mount point for your existing deCONZ volume from `/root/.local/share/dresden-elektronik/deCONZ` to `/opt/deCONZ`.
+3. Change the container mount point for your existing deCONZ volume from `/root/.local/share/dresden-elektronik/deCONZ` to `/opt/deCONZ`. Be careful, the path in container is case sensitive.
 
 Pull the new image and start up.
 
