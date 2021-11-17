@@ -134,7 +134,7 @@ Then, you can do `docker-compose pull` to pull the latest deconzcommunity/deconz
 
 #### Healthcheck for container status
 
-Healthcheck is used for checking Phoscon web app port for detect current healthy state of the running deconz container.
+Healthcheck is used for checking Phoscon web app port for detect current healthy state of the running deCONZ container.
 
 #### Running on Docker for Mac / Docker for Windows
 
