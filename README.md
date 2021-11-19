@@ -2,9 +2,9 @@
 
 This image is replacing the `marthoc/deconz` image.
 
-If you are migrating an existing `marthoc/deconz` install to `deconzcommunity/deconz`, you MUST modify your configuration a bit. _Carefully_ follow these steps:
+If you are migrating an existing `marthoc/deconz` install to `deconzcommunity/deconz`, you need to modify your configuration before starting up on the new image. _Carefully_ follow these steps:
 
-1. Make sure you have the latest backup from the Phoscon.
+1. Make sure you have the latest backup from Phoscon.
 2. Change the image from `marthoc/deconz` to `deconzcommunity/deconz`. Available tags can be found [here](https://hub.docker.com/r/deconzcommunity/deconz/tags).
 3. Change the container mount point for your existing deCONZ volume from `/root/.local/share/dresden-elektronik/deCONZ` to `/opt/deCONZ`.
 
@@ -255,6 +255,10 @@ A: In order to flash the device, no other program or device on the system can be
 Q: Why does a flash run fail after some seconds even if I specified a timeout much longer?
 
 A: By setting a timeout you allowed the flashing tool to start as many runs as will fit into this period. The timeout of a single run can not be changed by parameters.
+
+### Notes on OTAU (Over The Air Updates)
+
+The OTAU Plugin in deCONZ expects to find firmware files in the `/opt/deCONZ/otau` folder inside the container.
 
 ### Viewing the deCONZ ZigBee mesh with VNC
 
