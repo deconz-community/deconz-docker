@@ -137,6 +137,7 @@ if [ "$DECONZ_UPNP" != 1 ]; then
 fi
 
 mkdir -p /opt/deCONZ/otau
+sudo -u deconz ln -sf /opt/deCONZ/otau /home/deconz/otau
 
 chown deconz:deconz /opt/deCONZ -R
 
