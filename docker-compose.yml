@@ -27,3 +27,7 @@ services:
       - DECONZ_UID=1000
       - DECONZ_GID=1000
       - DECONZ_START_VERBOSE=0
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
