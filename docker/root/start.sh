@@ -88,10 +88,10 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   chown deconz:deconz /opt/deCONZ/vnc/passwd
 
   # Cleanup previous VNC session data
-  sudo -u deconz tigervncserver -kill "$DECONZ_VNC_DISPLAY"
+  gosu deconz tigervncserver -kill "$DECONZ_VNC_DISPLAY"
 
   # Set VNC security
-  sudo -u deconz tigervncserver -SecurityTypes VncAuth,TLSVnc "$DECONZ_VNC_DISPLAY"
+  gosu deconz tigervncserver -SecurityTypes VncAuth,TLSVnc "$DECONZ_VNC_DISPLAY"
 
   # Export VNC display variable
   export DISPLAY=$DECONZ_VNC_DISPLAY
@@ -120,7 +120,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
     chown deconz:deconz $NOVNC_CERT
 
     #Start noVNC
-    sudo -u deconz websockify -D --web=/usr/share/novnc/ --cert="$NOVNC_CERT" $DECONZ_NOVNC_PORT localhost:$DECONZ_VNC_PORT
+    gosu deconz websockify -D --web=/usr/share/novnc/ --cert="$NOVNC_CERT" $DECONZ_NOVNC_PORT localhost:$DECONZ_VNC_PORT
     echo "[deconzcommunity/deconz] NOVNC port: $DECONZ_NOVNC_PORT"
   fi
 
@@ -142,4 +142,4 @@ ln -sf /opt/deCONZ/otau /home/deconz/otau
 chown deconz:deconz /home/deconz/otau
 chown deconz:deconz /opt/deCONZ -R
 
-sudo -u deconz /usr/bin/deCONZ $DECONZ_OPTS
+gosu deconz /usr/bin/deCONZ $DECONZ_OPTS
