@@ -142,4 +142,4 @@ ln -sf /opt/deCONZ/otau /home/deconz/otau
 chown deconz:deconz /home/deconz/otau
 chown deconz:deconz /opt/deCONZ -R
 
-gosu deconz /usr/bin/deCONZ $DECONZ_OPTS
+exec gosu deconz /usr/bin/deCONZ $DECONZ_OPTS
