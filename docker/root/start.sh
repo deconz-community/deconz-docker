@@ -23,11 +23,11 @@ DECONZ_OPTS="--auto-connect=1 \
 echo "[deconzcommunity/deconz] Modifying user and group ID"
 if [ "$DECONZ_UID" != 1000 ]; then
   DECONZ_UID=${DECONZ_UID:-1000}
-  sudo usermod -o -u "$DECONZ_UID" deconz
+  usermod -o -u "$DECONZ_UID" deconz
 fi
 if [ "$DECONZ_GID" != 1000 ]; then
   DECONZ_GID=${DECONZ_GID:-1000}
-  sudo groupmod -o -g "$DECONZ_GID" deconz
+  groupmod -o -g "$DECONZ_GID" deconz
 fi
 
 echo "[deconzcommunity/deconz] Checking device group ID"
@@ -51,13 +51,13 @@ fi
 DIALOUTGROUPID=$(stat --printf='%g' $DEVICE)
 DIALOUTGROUPID=${DIALOUTGROUPID:-20}
 if [ "$DIALOUTGROUPID" != 20 ]; then
-  sudo groupmod -o -g "$DIALOUTGROUPID" dialout
+  groupmod -o -g "$DIALOUTGROUPID" dialout
 fi
 
 #workaround if the group of the device doesn't have any permissions
 GROUPPERMISSIONS=$(stat -c "%A" $DEVICE | cut -c 5-7)
 if [ "$GROUPPERMISSIONS" = "---" ]; then
-  sudo chmod g+rw $DEVICE
+  chmod g+rw $DEVICE
 fi
 
 if [ "$DECONZ_VNC_MODE" != 0 ]; then
@@ -74,7 +74,8 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
     mkdir /opt/deCONZ/vnc
   fi
 
-  sudo -u deconz ln -sf /opt/deCONZ/vnc /home/deconz/.vnc
+  ln -sf /opt/deCONZ/vnc /home/deconz/.vnc
+  chown deconz:deconz /home/deconz/.vnc
   chown deconz:deconz /opt/deCONZ -R
 
   # Set VNC password
@@ -87,10 +88,10 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   chown deconz:deconz /opt/deCONZ/vnc/passwd
 
   # Cleanup previous VNC session data
-  sudo -u deconz tigervncserver -kill "$DECONZ_VNC_DISPLAY"
+  gosu deconz tigervncserver -kill "$DECONZ_VNC_DISPLAY"
 
   # Set VNC security
-  sudo -u deconz tigervncserver -SecurityTypes VncAuth,TLSVnc "$DECONZ_VNC_DISPLAY"
+  gosu deconz tigervncserver -SecurityTypes VncAuth,TLSVnc "$DECONZ_VNC_DISPLAY"
 
   # Export VNC display variable
   export DISPLAY=$DECONZ_VNC_DISPLAY
@@ -119,7 +120,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
     chown deconz:deconz $NOVNC_CERT
 
     #Start noVNC
-    sudo -u deconz websockify -D --web=/usr/share/novnc/ --cert="$NOVNC_CERT" $DECONZ_NOVNC_PORT localhost:$DECONZ_VNC_PORT
+    gosu deconz websockify -D --web=/usr/share/novnc/ --cert="$NOVNC_CERT" $DECONZ_NOVNC_PORT localhost:$DECONZ_VNC_PORT
     echo "[deconzcommunity/deconz] NOVNC port: $DECONZ_NOVNC_PORT"
   fi
 
@@ -137,8 +138,8 @@ if [ "$DECONZ_UPNP" != 1 ]; then
 fi
 
 mkdir -p /opt/deCONZ/otau
-sudo -u deconz ln -sf /opt/deCONZ/otau /home/deconz/otau
-
+ln -sf /opt/deCONZ/otau /home/deconz/otau
+chown deconz:deconz /home/deconz/otau
 chown deconz:deconz /opt/deCONZ -R
 
-sudo -u deconz /usr/bin/deCONZ $DECONZ_OPTS
+exec gosu deconz /usr/bin/deCONZ $DECONZ_OPTS
