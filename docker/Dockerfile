@@ -1,10 +1,11 @@
-FROM debian:10.11-slim
+FROM debian:11.1-slim
 
 # Build arguments
 ARG VERSION
 ARG CHANNEL
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Runtime environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
