@@ -12,7 +12,7 @@ on:
 
 jobs:
   docker-build:
-    if: ${{ github.event.label.name == 'Development-Image' }}
+    if: ${{ github.event.label.name == 'Dev-Image' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
