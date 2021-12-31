@@ -79,6 +79,7 @@ jobs:
           build-args: |
             VERSION=${{ steps.version.outputs.prop }}
             CHANNEL=${{ steps.channel.outputs.prop }}
+          push: true
           tags: |
             deconzcommunity/deconz:dev
             ghcr.io/${{ github.repository }}:dev
