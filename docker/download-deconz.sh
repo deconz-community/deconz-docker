@@ -6,7 +6,7 @@ DECONZ_VERSION=$1
 CHANNEL=$2
 PLATFORM=$3
 
-case "{$PLATFORM}" in
+case "${PLATFORM}" in
   */arm64)
     URL="http://deconz.dresden-elektronik.de/debian/${CHANNEL}/deconz_${DECONZ_VERSION}-debian-buster-${CHANNEL}_arm64.deb"
     ;;
