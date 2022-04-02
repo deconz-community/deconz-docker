@@ -71,10 +71,10 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   echo "[deconzcommunity/deconz] VNC port: $DECONZ_VNC_PORT"
 
   if [ ! -e /opt/deCONZ/vnc ]; then
-    mkdir /opt/deCONZ/vnc
+    mkdir -p /opt/deCONZ/vnc
   fi
 
-  ln -sf /opt/deCONZ/vnc /home/deconz/.vnc
+  ln -sfT /opt/deCONZ/vnc /home/deconz/.vnc
   chown deconz:deconz /home/deconz/.vnc
   chown deconz:deconz /opt/deCONZ -R
 
@@ -138,7 +138,7 @@ if [ "$DECONZ_UPNP" != 1 ]; then
 fi
 
 mkdir -p /opt/deCONZ/otau
-ln -sf /opt/deCONZ/otau /home/deconz/otau
+ln -sfT /opt/deCONZ/otau /home/deconz/otau
 chown deconz:deconz /home/deconz/otau
 chown deconz:deconz /opt/deCONZ -R
 
