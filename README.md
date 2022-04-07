@@ -10,6 +10,15 @@ If you are migrating an existing `marthoc/deconz` install to `deconzcommunity/de
 
 Pull the new image and start up.
 
+## Notes for Synology users
+
+We've had numerous reports of issues when deCONZ is run as an unprivileged user, which is the default behaviour. Because of this, it is highly recommended that you run deCONZ as root. To do so, set the following two environment variables:
+
+```
+DECONZ_UID=0
+DECONZ_GID=0
+```
+
 ---
 
 ## deCONZ Docker Image
@@ -38,7 +47,7 @@ Please consult Docker Hub or Github Container Registry for the latest available 
 
 ### Running the deCONZ Container
 
-#### Pre-requisite
+#### Pre-requisites
 
 Before running the command that creates the deconz Docker container, you may need to add your Linux user to the `dialout` group, which allows the user access to serial devices (i.e. Conbee/Conbee II/RaspBee/RaspBeeII):
 
@@ -46,10 +55,8 @@ Before running the command that creates the deconz Docker container, you may nee
 sudo usermod -a -G dialout $USER
 ```
 
-For a RaspBee/Raspbee 2 installation on a Raspberry PI 4B : Make sure to have Wiring Pi updated to the latest version!
-```
-sudo apt install wiringpi
-``` 
+For a RaspBee/Raspbee 2 installation on a Raspberry PI 4B : Make sure to have Wiring Pi updated to the latest version! Install instructions can be found on http://wiringpi.com/wiringpi-updated-to-2-52-for-the-raspberry-pi-4b/
+
 #### Command Line
 
 ```bash
