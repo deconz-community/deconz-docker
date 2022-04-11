@@ -81,8 +81,13 @@ COPY download-deconz.sh /
 
 RUN chmod +x /download-deconz.sh && /download-deconz.sh ${VERSION} ${CHANNEL} ${TARGETPLATFORM}
 
-RUN dpkg -i /deconz.deb && \
-    chown root:root /usr/bin/deCONZ* && \
+RUN if [ "${TARGETPLATFORM}" = "linux/arm/v6" ] ; then \
+    dpkg -i --add-architecture armhf /deconz.deb
+
+RUN if [ "${TARGETPLATFORM}" != "linux/arm/v6" ] ; then \
+    dpkg -i /deconz.deb
+
+RUN chown root:root /usr/bin/deCONZ* && \
     setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/deCONZ && \
     rm -f /deconz.deb
 
