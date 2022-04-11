@@ -82,7 +82,7 @@ COPY download-deconz.sh /
 RUN chmod +x /download-deconz.sh && /download-deconz.sh ${VERSION} ${CHANNEL} ${TARGETPLATFORM}
 
 RUN if [ "${TARGETPLATFORM}" = "linux/arm/v6" ] ; then \
-    apt --add-architecture armhf ; fi
+    dpkg --add-architecture armhf ; fi
 
 RUN apt install /deconz.deb && \
     chown root:root /usr/bin/deCONZ* && \
