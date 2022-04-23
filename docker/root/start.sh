@@ -14,11 +14,16 @@ DECONZ_OPTS="--auto-connect=1 \
         --dbg-info=$DEBUG_INFO \
         --dbg-aps=$DEBUG_APS \
         --dbg-zcl=$DEBUG_ZCL \
+        --dbg-ddf=$DEBUG_DEV \
+        --dbg-dev=$DEBUG_DDF \
         --dbg-zdp=$DEBUG_ZDP \
         --dbg-ota=$DEBUG_OTA \
 	--dbg-error=$DEBUG_ERROR \
         --http-port=$DECONZ_WEB_PORT \
         --ws-port=$DECONZ_WS_PORT"
+
+echo "[deconzcommunity/deconz] Using options $DECONZ_OPTS"
+
 
 echo "[deconzcommunity/deconz] Modifying user and group ID"
 if [ "$DECONZ_UID" != 1000 ]; then
