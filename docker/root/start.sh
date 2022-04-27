@@ -65,6 +65,9 @@ if [ "$GROUPPERMISSIONS" = "---" ]; then
   chmod g+rw $DEVICE
 fi
 
+# delete VNC temp files, that can cause bootloop (see #100)
+rm /tmp/.X0-lock /tmp/.X11-unix/X0 -f
+
 if [ "$DECONZ_VNC_MODE" != 0 ]; then
 
   if [ "$DECONZ_VNC_PORT" -lt 5900 ]; then
