@@ -94,6 +94,12 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
 
   # Cleanup previous VNC session data
   gosu deconz tigervncserver -kill "$DECONZ_VNC_DISPLAY"
+  gosu deconz tigervncserver -list ':*' -cleanstale
+  for lock in "/tmp/.X${DECONZ_VNC_DISPLAY#:}-lock" "/tmp/.X11-unix/X${DECONZ_VNC_DISPLAY#:}"; do
+    [ -e "$lock" ] || continue
+    echo "[deconzcommunity/deconz] WARN - VNC-lock found. Deleting: $lock"
+    rm "$lock"
+  done
 
   # Set VNC security
   gosu deconz tigervncserver -SecurityTypes VncAuth,TLSVnc "$DECONZ_VNC_DISPLAY"
