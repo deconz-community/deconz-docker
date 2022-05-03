@@ -93,7 +93,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   chown deconz:deconz /opt/deCONZ/vnc/passwd
 
   # Cleanup previous VNC session data
-  gosu deconz tigervncserver -kill "$DECONZ_VNC_DISPLAY"
+  gosu deconz tigervncserver -kill ':*'
   gosu deconz tigervncserver -list ':*' -cleanstale
   for lock in "/tmp/.X${DECONZ_VNC_DISPLAY#:}-lock" "/tmp/.X11-unix/X${DECONZ_VNC_DISPLAY#:}"; do
     [ -e "$lock" ] || continue
