@@ -18,12 +18,12 @@ DECONZ_OPTS="--auto-connect=1 \
         --dbg-dev=$DEBUG_DEV \
         --dbg-zdp=$DEBUG_ZDP \
         --dbg-ota=$DEBUG_OTA \
-	      --dbg-error=$DEBUG_ERROR \
+        --dbg-error=$DEBUG_ERROR \
         --dbg-http=$DEBUG_HTTP \
         --http-port=$DECONZ_WEB_PORT \
         --ws-port=$DECONZ_WS_PORT"
 
-echo "[deconzcommunity/deconz] Using options $DECONZ_OPTS"
+echo "[deconzcommunity/deconz] Using options" $DECONZ_OPTS
 
 
 echo "[deconzcommunity/deconz] Modifying user and group ID"
