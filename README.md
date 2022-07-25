@@ -19,7 +19,15 @@ DECONZ_UID=0
 DECONZ_GID=0
 ```
 
+### Notes for Raspberry Pi users
+
+It may be necessary to run the deCONZ docker image in privileged mode for it to be able to connect and control a Conbee II or Raspbee device.
+Using a docker compose file is the easiest to do so, and you need to make sure that `privileged: true` is contained in it.
+
+See [Configuring deCONZ Container for Conbee II on Raspberry Pi](#configuring-deconz-container-for-conbee-ii-on-raspberry-pi) below
+
 ---
+
 
 ## deCONZ Docker Image
 
@@ -183,6 +191,54 @@ echo 'dtoverlay=pi3-miniuart-bt' | sudo tee -a /boot/config.txt
 ```
 
 After running the above command and rebooting, RaspBee should be available at /dev/ttyAMA0.
+
+### Configuring deCONZ Container for Conbee II on Raspberry Pi
+
+It may be necessary to run the deCONZ docker image in privileged mode for it to be able to connect and control a Conbee II or Raspbee device.
+Using a docker compose file is the easiest to do so, and you need to make sure that `privileged: true` is contained in it.
+
+Here is an example of a docker-compose file:
+
+```yaml
+version: "3"
+services:
+  deconz:
+    image: deconzcommunity/deconz:stable
+    container_name: deconz
+    restart: always
+    privileged: true                # This is important! Without it, the deCONZ image won't be able to connect to Conbee II.
+    ports: 
+      - 80:80
+      - 443:443
+    volumes:
+      - /opt/deCONZ:/opt/deCONZ
+    devices:
+      - /dev/ttyACM0                # This is the USB device that Conbee II is running on.
+    environment:
+      - TZ=Europe/Berlin
+      - DECONZ_WEB_PORT=80
+      - DECONZ_WS_PORT=443
+      - DEBUG_INFO=1
+      - DEBUG_APS=0
+      - DEBUG_ZCL=0
+      - DEBUG_ZDP=0
+      - DEBUG_OTAU=0
+      - DEBUG_HTTP=0
+      - DECONZ_DEVICE=/dev/ttyACM0   # This is the USB device that Conbee II is running on.
+      - DECONZ_START_VERBOSE=0
+```
+
+Also note, that the USB device where Conbee II is installed needs to be mapped into the deCONZ docker container.
+To find out which path Conbee II is on, you can use the following command: 
+
+```shell
+ls -al /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2251419-if00
+
+# output:
+lrwxrwxrwx 1 root root 13 Jul 23 00:13 /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2251419-if00 -> ../../ttyACM0
+```
+
+Note the symbolic link pointing to `/dev/ttyACM0`. That's the serial device that Conbee II USB Stick is occupying!
 
 ### Updating Conbee/RaspBee Firmware
 
