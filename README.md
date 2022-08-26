@@ -145,7 +145,7 @@ services:
       - DEBUG_APS=0
       - DEBUG_ZCL=0
       - DEBUG_ZDP=0
-      - DEBUG_OTAU=0
+      - DEBUG_OTA=0
 ```
 
 Then, you can do `docker-compose pull` to pull the latest deconzcommunity/deconz image, `docker-compose up -d` to start the deconz container service, and `docker-compose down` to stop the deconz service and delete the container. Note that these commands will also pull, start, and stop any other services defined in docker-compose.yml.
@@ -222,7 +222,7 @@ services:
       - DEBUG_APS=0
       - DEBUG_ZCL=0
       - DEBUG_ZDP=0
-      - DEBUG_OTAU=0
+      - DEBUG_OTA=0
       - DEBUG_HTTP=0
       - DECONZ_DEVICE=/dev/ttyACM0   # This is the USB device that Conbee II is running on.
       - DECONZ_START_VERBOSE=0
