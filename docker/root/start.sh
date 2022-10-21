@@ -85,7 +85,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   chown deconz:deconz /opt/deCONZ -R
 
   echo "[deconzcommunity/deconz] VNC DISABLE PASSWORD: $DECONZ_VNC_DISABLE_PASSWORD"
-  if [ "$DECONZ_VNC_DISABLE_PASSWORD" = 1 ]; then
+  if [ "$DECONZ_VNC_DISABLE_PASSWORD" = 0 ]; then
     # Set VNC password
     if [ "$DECONZ_VNC_PASSWORD_FILE" != 0 ] && [ -f "$DECONZ_VNC_PASSWORD_FILE" ]; then
         DECONZ_VNC_PASSWORD=$(cat $DECONZ_VNC_PASSWORD_FILE)
