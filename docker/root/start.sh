@@ -96,7 +96,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
     chown deconz:deconz /opt/deCONZ/vnc/passwd
     SECURITYTYPES="VncAuth,TLSVnc"
   else
-    SECURITYTYPES="TLSVnc"
+    SECURITYTYPES="None"
   fi
 
   # Cleanup previous VNC session data
