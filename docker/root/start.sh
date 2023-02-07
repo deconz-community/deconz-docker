@@ -84,14 +84,20 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   chown deconz:deconz /home/deconz/.vnc
   chown deconz:deconz /opt/deCONZ -R
 
-  # Set VNC password
-  if [ "$DECONZ_VNC_PASSWORD_FILE" != 0 ] && [ -f "$DECONZ_VNC_PASSWORD_FILE" ]; then
-      DECONZ_VNC_PASSWORD=$(cat $DECONZ_VNC_PASSWORD_FILE)
-  fi
+  echo "[deconzcommunity/deconz] VNC DISABLE PASSWORD: $DECONZ_VNC_DISABLE_PASSWORD"
+  if [ "$DECONZ_VNC_DISABLE_PASSWORD" = 0 ]; then
+    # Set VNC password
+    if [ "$DECONZ_VNC_PASSWORD_FILE" != 0 ] && [ -f "$DECONZ_VNC_PASSWORD_FILE" ]; then
+        DECONZ_VNC_PASSWORD=$(cat $DECONZ_VNC_PASSWORD_FILE)
+    fi
 
-  echo "$DECONZ_VNC_PASSWORD" | tigervncpasswd -f > /opt/deCONZ/vnc/passwd
-  chmod 600 /opt/deCONZ/vnc/passwd
-  chown deconz:deconz /opt/deCONZ/vnc/passwd
+    echo "$DECONZ_VNC_PASSWORD" | tigervncpasswd -f > /opt/deCONZ/vnc/passwd
+    chmod 600 /opt/deCONZ/vnc/passwd
+    chown deconz:deconz /opt/deCONZ/vnc/passwd
+    SECURITYTYPES="VncAuth,TLSVnc"
+  else
+    SECURITYTYPES="None,TLSNone"
+  fi
 
   # Cleanup previous VNC session data
   gosu deconz tigervncserver -kill ':*'
@@ -103,7 +109,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   done
 
   # Set VNC security
-  gosu deconz tigervncserver -SecurityTypes VncAuth,TLSVnc "$DECONZ_VNC_DISPLAY"
+  gosu deconz tigervncserver -SecurityTypes "$SECURITYTYPES" "$DECONZ_VNC_DISPLAY"
 
   # Export VNC display variable
   export DISPLAY=$DECONZ_VNC_DISPLAY
