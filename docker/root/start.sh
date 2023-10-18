@@ -98,6 +98,15 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
     SECURITYTYPES="None,TLSNone"
   fi
 
+  # Check if hostname is valid, otherwise apply fix
+  hostname &>/dev/null
+  if [ $? != 0 ]; then
+    echo "[deconzcommunity/deconz] - Applying Synology hostname fix"
+    echo '127.0.0.1 deconz' >>/etc/hosts
+    echo 'deconz' >/etc/hostname
+    hostname deconz
+  fi
+
   # Cleanup previous VNC session data
   gosu deconz tigervncserver -kill ':*'
   gosu deconz tigervncserver -list ':*' -cleanstale
@@ -107,30 +116,8 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
     rm "$lock"
   done
 
-  ##### Debug start
-  echo "DEBUG - /etc/hosts"
-  cat /etc/hosts
-  echo "DEBUG - /etc/hostname"
-  cat /etc/hostname
-  echo "DEBUG - env"
-  env
-
   # Set VNC security
   gosu deconz tigervncserver -SecurityTypes "$SECURITYTYPES" "$DECONZ_VNC_DISPLAY"
-  if [ $? != 0 ]; then
-    echo "[deconzcommunity/deconz] - Trying another hostname workaround for tigervncserver"
-    echo 'DEBUG - Populating hosts and hostname'
-    echo '127.0.0.1 deconz' >>/etc/hosts
-    echo 'deconz' >/etc/hostname
-    echo 'Running hostname'
-    hostname
-    echo 'Running hostname -b'
-    hostname -b
-    echo 'Running hostname deconz'
-    hostname deconz
-    gosu deconz tigervncserver -SecurityTypes "$SECURITYTYPES" "$DECONZ_VNC_DISPLAY"
-  fi
-  ##### Debug end
 
   # Export VNC display variable
   export DISPLAY=$DECONZ_VNC_DISPLAY
