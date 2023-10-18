@@ -101,7 +101,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   # Check if hostname is valid, otherwise apply fix
   tigervncserver -version >/dev/null 2>&1
   if [ $? != 0 ]; then
-    echo "[deconzcommunity/deconz] - Applying hostname fix"
+    echo "[deconzcommunity/deconz] Applying hostname fix to avoid tigervncserver crash"
     echo '127.0.0.1 deconz' >>/etc/hosts
     echo 'deconz' >/etc/hostname
     hostname deconz
