@@ -1,4 +1,4 @@
-FROM debian:11.5-slim
+FROM debian:12.2-slim
 
 # Build arguments
 ARG VERSION
