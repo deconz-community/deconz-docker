@@ -99,9 +99,9 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   fi
 
   # Check if hostname is valid, otherwise apply fix
-  hostname &>/dev/null
+  hostname --fqdn &>/dev/null
   if [ $? != 0 ]; then
-    echo "[deconzcommunity/deconz] - Applying Synology hostname fix"
+    echo "[deconzcommunity/deconz] - Applying hostname fix"
     echo '127.0.0.1 deconz' >>/etc/hosts
     echo 'deconz' >/etc/hostname
     hostname deconz
