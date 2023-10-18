@@ -25,7 +25,6 @@ DECONZ_OPTS="--auto-connect=1 \
 
 echo "[deconzcommunity/deconz] Using options" $DECONZ_OPTS
 
-
 echo "[deconzcommunity/deconz] Modifying user and group ID"
 if [ "$DECONZ_UID" != 1000 ]; then
   DECONZ_UID=${DECONZ_UID:-1000}
@@ -40,18 +39,18 @@ echo "[deconzcommunity/deconz] Checking device group ID"
 if [ "$DECONZ_DEVICE" != 0 ]; then
   DEVICE=$DECONZ_DEVICE
 else
- if [ -e /dev/ttyUSB0 ]; then
-   DEVICE=/dev/ttyUSB0
- fi
- if [ -e /dev/ttyACM0 ]; then
-   DEVICE=/dev/ttyACM0
- fi
- if [ -e /dev/ttyAMA0 ]; then
-   DEVICE=/dev/ttyAMA0
- fi
- if [ -e /dev/ttyS0 ]; then
-   DEVICE=/dev/ttyS0
- fi
+  if [ -e /dev/ttyUSB0 ]; then
+    DEVICE=/dev/ttyUSB0
+  fi
+  if [ -e /dev/ttyACM0 ]; then
+    DEVICE=/dev/ttyACM0
+  fi
+  if [ -e /dev/ttyAMA0 ]; then
+    DEVICE=/dev/ttyAMA0
+  fi
+  if [ -e /dev/ttyS0 ]; then
+    DEVICE=/dev/ttyS0
+  fi
 fi
 
 DIALOUTGROUPID=$(stat --printf='%g' $DEVICE)
@@ -88,15 +87,24 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   if [ "$DECONZ_VNC_DISABLE_PASSWORD" = 0 ]; then
     # Set VNC password
     if [ "$DECONZ_VNC_PASSWORD_FILE" != 0 ] && [ -f "$DECONZ_VNC_PASSWORD_FILE" ]; then
-        DECONZ_VNC_PASSWORD=$(cat $DECONZ_VNC_PASSWORD_FILE)
+      DECONZ_VNC_PASSWORD=$(cat $DECONZ_VNC_PASSWORD_FILE)
     fi
 
-    echo "$DECONZ_VNC_PASSWORD" | tigervncpasswd -f > /opt/deCONZ/vnc/passwd
+    echo "$DECONZ_VNC_PASSWORD" | tigervncpasswd -f >/opt/deCONZ/vnc/passwd
     chmod 600 /opt/deCONZ/vnc/passwd
     chown deconz:deconz /opt/deCONZ/vnc/passwd
     SECURITYTYPES="VncAuth,TLSVnc"
   else
     SECURITYTYPES="None,TLSNone"
+  fi
+
+  # Check if hostname is valid, otherwise apply fix
+  tigervncserver -version >/dev/null 2>&1
+  if [ $? != 0 ]; then
+    echo "[deconzcommunity/deconz] Applying hostname fix to avoid tigervncserver crash"
+    echo '127.0.0.1 deconz' >>/etc/hosts
+    echo 'deconz' >/etc/hostname
+    hostname deconz
   fi
 
   # Cleanup previous VNC session data
@@ -125,7 +133,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
     # Assert valid SSL certificate
     NOVNC_CERT="/opt/deCONZ/vnc/novnc.pem"
     if [ -f "$NOVNC_CERT" ]; then
-      openssl x509 -noout -in "$NOVNC_CERT" -checkend 0 > /dev/null
+      openssl x509 -noout -in "$NOVNC_CERT" -checkend 0 >/dev/null
       if [ $? != 0 ]; then
         echo "[deconzcommunity/deconz] The noVNC SSL certificate has expired; generating a new certificate now."
         rm "$NOVNC_CERT"

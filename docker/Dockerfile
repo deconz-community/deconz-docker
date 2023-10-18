@@ -36,10 +36,10 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Install deCONZ dependencies
 RUN apt-get update && \
     apt-get install -y \
-	gosu \
+        gosu \
         curl \
         kmod \
-	libatomic1 \
+        libatomic1 \
         libcap2-bin \
         libqt5core5a \
         libqt5gui5 \
@@ -48,7 +48,7 @@ RUN apt-get update && \
         libqt5sql5 \
         libqt5websockets5 \
         libqt5widgets5 \
-	libqt5qml5 \
+        libqt5qml5 \
         libssl1.1 \
         lsof \
         sqlite3 \
