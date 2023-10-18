@@ -3,23 +3,20 @@
 # ===========================
 # Configuration
 # ===========================
-VERSION=0.8
+VERSION=0.9
 # ---------------------------
 # Flasher and options
 # ---------------------------
 FLASHER=/usr/bin/GCFFlasher_internal
-FLASHER_PARAM_LIST=( -d -f -s -t -R -B -x )
+FLASHER_PARAM_LIST=( -d -f -t -x )
 typeset -A FLASHER_PARAM_NAMES=( # GCFFlasher <options>
                                  #  -r              force device reset without programming
     [-f]="Firmware file"         #  -f <firmware>   flash firmware file
     [-d]="Device path ."         #  -d <device>     device number or path to use, e.g. 0, /dev/ttyUSB0 or RaspBee
-    [-s]="Serial number"         #  -s <serial>     serial number to use
+    [-c]="Debug serial "         #  -c              connect and debug serial protocol
     [-t]="Timeout ....."         #  -t <timeout>    retry until timeout (seconds) is reached
-    [-R]="Retries ....."         #  -R <retries>    max. retries
-    [-B]="Baudrate ...."         #  -B <baudrate>   custom baudrate
                                  #  -l              list devices
     [-x]="Loglevel ...."         #  -x <loglevel>   debug log level 0, 1, 3
-                                 #  -j <test>       runs a test 1
                                  #  -h -?           print this help
 )
 typeset -A FLASHER_PARAM_PRINT=(
@@ -35,7 +32,7 @@ typeset -A FLASHER_PARAM_VALUES=(
 # ---------------------------
 # Firmware details
 # ---------------------------
-FW_PATH=/usr/share/deCONZ/firmware/
+FW_PATH=/tmp
 typeset -A FW_ONLINE_BASES=(
     [stable]="http://deconz.dresden-elektronik.de/deconz-firmware/"
     [beta]="http://deconz.dresden-elektronik.de/deconz-firmware/beta/"
