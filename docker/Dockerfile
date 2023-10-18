@@ -49,7 +49,7 @@ RUN apt-get update && \
         libqt5websockets5 \
         libqt5widgets5 \
         libqt5qml5 \
-        libssl1.1 \
+	libssl \
         lsof \
         sqlite3 \
         tigervnc-standalone-server \
