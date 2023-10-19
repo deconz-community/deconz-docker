@@ -39,6 +39,7 @@ RUN apt-get update && \
         gosu \
         curl \
         kmod \
+        udev \
         libatomic1 \
         libcap2-bin \
         libqt5core5a \
@@ -49,7 +50,7 @@ RUN apt-get update && \
         libqt5websockets5 \
         libqt5widgets5 \
         libqt5qml5 \
-	libssl3 \
+        libssl3 \
         lsof \
         sqlite3 \
         tigervnc-standalone-server \
