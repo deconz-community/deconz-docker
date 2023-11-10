@@ -28,6 +28,7 @@ services:
       - DECONZ_UID=1000
       - DECONZ_GID=1000
       - DECONZ_START_VERBOSE=0
+      - DECONZ_BAUDRATE=115200
     logging:
       driver: "json-file"
       options:
