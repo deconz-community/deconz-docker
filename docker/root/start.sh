@@ -25,7 +25,7 @@ DECONZ_OPTS="--auto-connect=1 \
         --ws-port=$DECONZ_WS_PORT"
 
 if [ "$DECONZ_BAUDRATE" != 0 ]; then
-  DECONZ_OPTS+=" --DECONZ_BAUDRATE=$DECONZ_BAUDRATE"
+  DECONZ_OPTS="$DECONZ_OPTS --DECONZ_BAUDRATE=$DECONZ_BAUDRATE"
 fi
 
 echo "[deconzcommunity/deconz] Using options" $DECONZ_OPTS
