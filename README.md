@@ -119,6 +119,7 @@ Use these environment variables to change the default behaviour of the container
 |`-e DECONZ_UID=1000`|Set the user id of deCONZ volume|
 |`-e DECONZ_GID=1000`|Set the group id of deCONZ volume|
 |`-e DECONZ_START_VERBOSE=0`|Set this option to 0 to disable verbose of start script, set to 1 to enable `set -x` logging|
+|`-e DECONZ_BAUDRATE=115200`|Set the baudrate of the conbee stick, for conbee 3 this needs to be set|
 
 #### Docker-Compose
 

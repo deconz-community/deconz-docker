@@ -4,6 +4,7 @@ if [ "$DECONZ_START_VERBOSE" = 1 ]; then
   set -x
 fi
 
+
 echo "[deconzcommunity/deconz] Starting deCONZ..."
 echo "[deconzcommunity/deconz] Current deCONZ version: $DECONZ_VERSION"
 echo "[deconzcommunity/deconz] Web UI port: $DECONZ_WEB_PORT"
@@ -22,6 +23,10 @@ DECONZ_OPTS="--auto-connect=1 \
         --dbg-http=$DEBUG_HTTP \
         --http-port=$DECONZ_WEB_PORT \
         --ws-port=$DECONZ_WS_PORT"
+
+if [ "$DECONZ_BAUDRATE" != 0 ]; then
+  DECONZ_OPTS="$DECONZ_OPTS --baudrate=$DECONZ_BAUDRATE"
+fi
 
 echo "[deconzcommunity/deconz] Using options" $DECONZ_OPTS
 
