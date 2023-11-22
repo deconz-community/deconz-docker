@@ -1,4 +1,4 @@
-## Notes for Conbee 3 users
+## Notes for ConBee 3 users
 
 If you're using a ConBee 3 stick, you need to set the following environment variable for deCONZ to pick be able to communicate with the stick:
 
