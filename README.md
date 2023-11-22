@@ -1,14 +1,10 @@
-## Notes on migration
+## Notes for ConBee 3 users
 
-This image is replacing the `marthoc/deconz` image.
+If you're using a ConBee 3 stick, you need to set the following environment variable for deCONZ to pick be able to communicate with the stick:
 
-If you are migrating an existing `marthoc/deconz` install to `deconzcommunity/deconz`, you need to modify your configuration before starting up on the new image. _Carefully_ follow these steps:
-
-1. Make sure you have the latest backup from Phoscon.
-2. Change the image from `marthoc/deconz` to `deconzcommunity/deconz`. Available tags can be found [here](https://hub.docker.com/r/deconzcommunity/deconz/tags).
-3. Change the container mount point for your existing deCONZ volume from `/root/.local/share/dresden-elektronik/deCONZ` to `/opt/deCONZ`.
-
-Pull the new image and start up.
+```
+DECONZ_BAUDRATE=115200
+```
 
 ## Notes for Synology users
 
@@ -28,7 +24,6 @@ See [Configuring deCONZ Container for Conbee II on Raspberry Pi](#configuring-de
 
 ---
 
-
 ## deCONZ Docker Image
 
 This Docker image containerizes the deCONZ software from Dresden Elektronik, which controls a ZigBee network using a Conbee USB or RaspBee GPIO serial interface. This image runs deCONZ in "minimal" mode, for control of the ZigBee network via the WebUIs ("Wireless Light Control" and "Phoscon") and over the REST API and Websockets, and optionally runs a VNC server for viewing and interacting with the ZigBee mesh through the deCONZ UI.
@@ -37,12 +32,12 @@ Conbee is supported on `amd64`, `armhf`/`armv7`, and `aarch64`/`arm64` (i.e. Ras
 
 Builds of this image are available on (and should be pulled from) Docker Hub or Github Container Registry, with the following tags:
 
-|Tag|Description|
-|---|-----------|
-|latest|Latest release of deCONZ, stable or beta|
-|stable|Stable releases of deCONZ only|
-|beta|Beta releases of deCONZ only|
-|version|Specific versions of deCONZ, use only if you wish to pin your version of deCONZ, eg 2.13.02|
+| Tag     | Description                                                                                 |
+| ------- | ------------------------------------------------------------------------------------------- |
+| latest  | Latest release of deCONZ, stable or beta                                                    |
+| stable  | Stable releases of deCONZ only                                                              |
+| beta    | Beta releases of deCONZ only                                                                |
+| version | Specific versions of deCONZ, use only if you wish to pin your version of deCONZ, eg 2.13.02 |
 
 The "latest", "stable", and "version" tags have multiarch support for amd64, armv7, and arm64, so specifying any of these tags will pull the correct version for your architecture.
 
@@ -81,45 +76,45 @@ docker run -d \
 
 #### Command line Options
 
-|Parameter|Description|
-|---------|-----------|
-|`--name=deconz`|Names the container "deconz".|
-|`--net=host`|Uses host networking mode for proper uPNP functionality; by default, the web UIs and REST API listen on port 80 and the websockets service listens on port 443. If these ports conflict with other services on your host, you can change them through the environment variables DECONZ_WEB_PORT and DECONZ_WS_PORT described below.|
-|`--restart=always`|Start the container when Docker starts (i.e. on boot/reboot).|
-|`-v /etc/localtime:/etc/localtime:ro`|Ensure the container has the correct local time (alternatively, use the TZ environment variable, see below).|
-|`-v /opt/deconz:/opt/deCONZ`|Bind mount /opt/deconz (or the directory of your choice) into the container for persistent storage.|
-|`--device=/dev/ttyUSB0`|Pass the serial device at ttyUSB0 into the container for use by deCONZ (you may need to investigate which device name is assigned to your device depending on if you are also using other usb serial devices; by default ConBee = /dev/ttyUSB0, Conbee II = /dev/ttyACM0, RaspBee = /dev/ttyAMA0 or /dev/ttyS0).|
-|`deconzcommunity/deconz`|This image uses a manifest list for multiarch support; specifying deconzcommunity/deconz:latest or deconzcommunity/deconz:stable will pull the correct version for your arch.|
+| Parameter                             | Description                                                                                                                                                                                                                                                                                                                         |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--name=deconz`                       | Names the container "deconz".                                                                                                                                                                                                                                                                                                       |
+| `--net=host`                          | Uses host networking mode for proper uPNP functionality; by default, the web UIs and REST API listen on port 80 and the websockets service listens on port 443. If these ports conflict with other services on your host, you can change them through the environment variables DECONZ_WEB_PORT and DECONZ_WS_PORT described below. |
+| `--restart=always`                    | Start the container when Docker starts (i.e. on boot/reboot).                                                                                                                                                                                                                                                                       |
+| `-v /etc/localtime:/etc/localtime:ro` | Ensure the container has the correct local time (alternatively, use the TZ environment variable, see below).                                                                                                                                                                                                                        |
+| `-v /opt/deconz:/opt/deCONZ`          | Bind mount /opt/deconz (or the directory of your choice) into the container for persistent storage.                                                                                                                                                                                                                                 |
+| `--device=/dev/ttyUSB0`               | Pass the serial device at ttyUSB0 into the container for use by deCONZ (you may need to investigate which device name is assigned to your device depending on if you are also using other usb serial devices; by default ConBee = /dev/ttyUSB0, Conbee II = /dev/ttyACM0, RaspBee = /dev/ttyAMA0 or /dev/ttyS0).                    |
+| `deconzcommunity/deconz`              | This image uses a manifest list for multiarch support; specifying deconzcommunity/deconz:latest or deconzcommunity/deconz:stable will pull the correct version for your arch.                                                                                                                                                       |
 
 #### Environment Variables
 
 Use these environment variables to change the default behaviour of the container.
 
-|Parameter|Description|
-|---------|-----------|
-|`-e DECONZ_WEB_PORT=8080`|By default, the web UIs ("Wireless Light Control" and "Phoscon") and the REST API listen on port 80; only set this environment variable if you wish to change the listen port.|
-|`-e DECONZ_WS_PORT=8443`|By default, the websockets service listens on port 443; only set this environment variable if you wish to change the listen port.|
-|`-e DEBUG_INFO=1`|Sets the level of the deCONZ command-line flag --dbg-info (default 1).|
-|`-e DEBUG_APS=0`|Sets the level of the deCONZ command-line flag --dbg-aps (default 0).|
-|`-e DEBUG_ZCL=0`|Sets the level of the deCONZ command-line flag --dbg-zcl (default 0).|
-|`-e DEBUG_ZDP=0`|Sets the level of the deCONZ command-line flag --dbg-zdp (default 0).|
-|`-e DEBUG_DDF=0`|Sets the level of the deCONZ command-line flag --dbg-ddf (default 0).|
-|`-e DEBUG_DEV=0`|Sets the level of the deCONZ command-line flag --dbg-dev (default 0).|
-|`-e DEBUG_OTA=0`|Sets the level of the deCONZ command-line flag --dbg-ota (default 0).|
-|`-e DEBUG_ERROR=0`|Sets the level of the deCONZ command-line flag --dbg-error (default 0).|
-|`-e DEBUG_HTTP=0`|Sets the level of the deCONZ command-line flag --dbg-http (default 0).|
-|`-e DECONZ_DEVICE=/dev/ttyUSB1`|By default, deCONZ searches for RaspBee at /dev/ttyAMA0 and Conbee at /dev/ttyUSB0; when using other USB devices (e.g. a Z-Wave stick) deCONZ may not find RaspBee/Conbee properly. Set this environment variable to the same string passed to --device to force deCONZ to use the specific USB device.|
-|`-e TZ=America/Toronto`|Set the local time zone so deCONZ has the correct time.|
-|`-e DECONZ_VNC_MODE=1`|Set this option to enable VNC access to the container to view the deCONZ ZigBee mesh|
-|`-e DECONZ_VNC_PORT=5900`|Default port for VNC mode is 5900; this option can be used to change this port|
-|`-e DECONZ_VNC_PASSWORD=changeme`|Default password for VNC mode is 'changeme'; this option can (should) be used to change the default password|
-|`-e DECONZ_VNC_PASSWORD_FILE=/var/secrets/my_secret`|Per default this is disabled and DECONZ_VNC_PASSWORD is used. Details on creating secrets for use with Docker containers can be found in the [corresponding section from the official documentation](https://docs.docker.com/engine/swarm/secrets/) |
-|`-e DECONZ_NOVNC_PORT=6080`|Default port for noVNC is 6080; this option can be used to change this port; setting the port to `0` will disable the noVNC functionality|
-|`-e DECONZ_UPNP=0`|Set this option to 0 to disable uPNP, see: https://github.com/dresden-elektronik/deconz-rest-plugin/issues/274|
-|`-e DECONZ_UID=1000`|Set the user id of deCONZ volume|
-|`-e DECONZ_GID=1000`|Set the group id of deCONZ volume|
-|`-e DECONZ_START_VERBOSE=0`|Set this option to 0 to disable verbose of start script, set to 1 to enable `set -x` logging|
-|`-e DECONZ_BAUDRATE=115200`|Set the baudrate of the conbee stick, for conbee 3 this needs to be set|
+| Parameter                                            | Description                                                                                                                                                                                                                                                                                             |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-e DECONZ_WEB_PORT=8080`                            | By default, the web UIs ("Wireless Light Control" and "Phoscon") and the REST API listen on port 80; only set this environment variable if you wish to change the listen port.                                                                                                                          |
+| `-e DECONZ_WS_PORT=8443`                             | By default, the websockets service listens on port 443; only set this environment variable if you wish to change the listen port.                                                                                                                                                                       |
+| `-e DEBUG_INFO=1`                                    | Sets the level of the deCONZ command-line flag --dbg-info (default 1).                                                                                                                                                                                                                                  |
+| `-e DEBUG_APS=0`                                     | Sets the level of the deCONZ command-line flag --dbg-aps (default 0).                                                                                                                                                                                                                                   |
+| `-e DEBUG_ZCL=0`                                     | Sets the level of the deCONZ command-line flag --dbg-zcl (default 0).                                                                                                                                                                                                                                   |
+| `-e DEBUG_ZDP=0`                                     | Sets the level of the deCONZ command-line flag --dbg-zdp (default 0).                                                                                                                                                                                                                                   |
+| `-e DEBUG_DDF=0`                                     | Sets the level of the deCONZ command-line flag --dbg-ddf (default 0).                                                                                                                                                                                                                                   |
+| `-e DEBUG_DEV=0`                                     | Sets the level of the deCONZ command-line flag --dbg-dev (default 0).                                                                                                                                                                                                                                   |
+| `-e DEBUG_OTA=0`                                     | Sets the level of the deCONZ command-line flag --dbg-ota (default 0).                                                                                                                                                                                                                                   |
+| `-e DEBUG_ERROR=0`                                   | Sets the level of the deCONZ command-line flag --dbg-error (default 0).                                                                                                                                                                                                                                 |
+| `-e DEBUG_HTTP=0`                                    | Sets the level of the deCONZ command-line flag --dbg-http (default 0).                                                                                                                                                                                                                                  |
+| `-e DECONZ_DEVICE=/dev/ttyUSB1`                      | By default, deCONZ searches for RaspBee at /dev/ttyAMA0 and Conbee at /dev/ttyUSB0; when using other USB devices (e.g. a Z-Wave stick) deCONZ may not find RaspBee/Conbee properly. Set this environment variable to the same string passed to --device to force deCONZ to use the specific USB device. |
+| `-e TZ=America/Toronto`                              | Set the local time zone so deCONZ has the correct time.                                                                                                                                                                                                                                                 |
+| `-e DECONZ_VNC_MODE=1`                               | Set this option to enable VNC access to the container to view the deCONZ ZigBee mesh                                                                                                                                                                                                                    |
+| `-e DECONZ_VNC_PORT=5900`                            | Default port for VNC mode is 5900; this option can be used to change this port                                                                                                                                                                                                                          |
+| `-e DECONZ_VNC_PASSWORD=changeme`                    | Default password for VNC mode is 'changeme'; this option can (should) be used to change the default password                                                                                                                                                                                            |
+| `-e DECONZ_VNC_PASSWORD_FILE=/var/secrets/my_secret` | Per default this is disabled and DECONZ_VNC_PASSWORD is used. Details on creating secrets for use with Docker containers can be found in the [corresponding section from the official documentation](https://docs.docker.com/engine/swarm/secrets/)                                                     |
+| `-e DECONZ_NOVNC_PORT=6080`                          | Default port for noVNC is 6080; this option can be used to change this port; setting the port to `0` will disable the noVNC functionality                                                                                                                                                               |
+| `-e DECONZ_UPNP=0`                                   | Set this option to 0 to disable uPNP, see: https://github.com/dresden-elektronik/deconz-rest-plugin/issues/274                                                                                                                                                                                          |
+| `-e DECONZ_UID=1000`                                 | Set the user id of deCONZ volume                                                                                                                                                                                                                                                                        |
+| `-e DECONZ_GID=1000`                                 | Set the group id of deCONZ volume                                                                                                                                                                                                                                                                       |
+| `-e DECONZ_START_VERBOSE=0`                          | Set this option to 0 to disable verbose of start script, set to 1 to enable `set -x` logging                                                                                                                                                                                                            |
+| `-e DECONZ_BAUDRATE=115200`                          | Set the baudrate of the conbee stick, for conbee 3 this needs to be set                                                                                                                                                                                                                                 |
 
 #### Docker-Compose
 
@@ -132,7 +127,7 @@ services:
     image: deconzcommunity/deconz
     container_name: deconz
     restart: always
-    ports: 
+    ports:
       - 80:80
       - 443:443
     volumes:
@@ -207,14 +202,14 @@ services:
     image: deconzcommunity/deconz:stable
     container_name: deconz
     restart: always
-    privileged: true                # This is important! Without it, the deCONZ image won't be able to connect to Conbee II.
-    ports: 
+    privileged: true # This is important! Without it, the deCONZ image won't be able to connect to Conbee II.
+    ports:
       - 80:80
       - 443:443
     volumes:
       - /opt/deCONZ:/opt/deCONZ
     devices:
-      - /dev/ttyACM0                # This is the USB device that Conbee II is running on.
+      - /dev/ttyACM0 # This is the USB device that Conbee II is running on.
     environment:
       - TZ=Europe/Berlin
       - DECONZ_WEB_PORT=80
@@ -225,12 +220,12 @@ services:
       - DEBUG_ZDP=0
       - DEBUG_OTA=0
       - DEBUG_HTTP=0
-      - DECONZ_DEVICE=/dev/ttyACM0   # This is the USB device that Conbee II is running on.
+      - DECONZ_DEVICE=/dev/ttyACM0 # This is the USB device that Conbee II is running on.
       - DECONZ_START_VERBOSE=0
 ```
 
 Also note, that the USB device where Conbee II is installed needs to be mapped into the deCONZ docker container.
-To find out which path Conbee II is on, you can use the following command: 
+To find out which path Conbee II is on, you can use the following command:
 
 ```shell
 ls -al /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2251419-if00
@@ -256,7 +251,9 @@ The script calls the flashing tool `GCFFlasher_internal` which will output any f
 To use the script for updating the firmware, follow the below instructions:
 
 ##### 1. Check your deCONZ container logs for the update firmware file name:
+
 Type `docker logs [container name]`, and look for lines near the beginning of the log that look like this, noting the `.GCF` file name listed (you'll need this later):
+
 ```
 GW update firmware found: /usr/share/deCONZ/firmware/deCONZ_Rpi_0x261e0500.bin.GCF
 GW firmware version: 0x261c0500
@@ -264,29 +261,35 @@ GW firmware version shall be updated to: 0x261e0500
 ```
 
 ##### 2. Stop your running deCONZ container. You must do this or the firmware update will fail:
+
 ```bash
 docker stop [container name]
 ```
+
 or
+
 ```bash
 docker-compose down
 ```
 
-##### 3. Invoke the firmware update script: 
+##### 3. Invoke the firmware update script:
+
 ```bash
 docker run -it --rm --entrypoint "/firmware-update.sh" --privileged --cap-add=ALL -v /dev:/dev -v /lib/modules:/lib/modules -v /sys:/sys deconzcommunity/deconz
 ```
 
-If you have multiple usb devices, you can map the `/dev/...` volume corresponding to your Conbee/Raspbee to avoid wrong path mapping. 
+If you have multiple usb devices, you can map the `/dev/...` volume corresponding to your Conbee/Raspbee to avoid wrong path mapping.
 
 ```bash
 docker run -it --rm --entrypoint "/firmware-update.sh" --privileged --cap-add=ALL -v /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DExxxxxxx-if00:/dev/ttyACM0  -v /lib/modules:/lib/modules -v /sys:/sys deconzcommunity/deconz
 ```
 
 You could also put additional options to the end of this call:
+
 ```bash
 docker run ... deconzcommunity/deconz [option1] [value1] [option2] [value2] ...
 ```
+
 If these are valid options for the flashing tool they will be added to the call:
 |Option|Description|Default (if any)|
 |------|-----------|----------------|
@@ -299,16 +302,20 @@ If these are valid options for the flashing tool they will be added to the call:
 Please note that the values for device and firmware-file are still asked by the script but your options are taken as default.
 
 ##### 4. Follow the prompts:
+
 - Enter the path (e.g. `/dev/ttyUSB0`) that corresponds to your device in the listing.
 - Type or paste the full file name that corresponds to the file name that you found in the deCONZ container logs in step 1 (or, select a different filename, but you should have a good reason for doing this).
-If there are newer firmware files ([found here](https://deconz.dresden-elektronik.de/deconz-firmware/)) than the ones contained in your docker you could specify the name and the script will try to initiate a download. Just follow the prompts.
+  If there are newer firmware files ([found here](https://deconz.dresden-elektronik.de/deconz-firmware/)) than the ones contained in your docker you could specify the name and the script will try to initiate a download. Just follow the prompts.
 - If the device/path, file name and listed options look OK, type Y to start flashing!
 
 ##### 5. Restart your deCONZ container:
+
 ```bash
 docker start [container name]
 ```
+
 or
+
 ```bash
 docker-compose up
 ```
@@ -333,7 +340,8 @@ Setting the environment variable DECONZ_VNC_MODE to 1 enables a VNC server in th
 
 Note that if you are not using --host networking, you will need to add a -p directive for the DECONZ_VNC_PORT (i.e. `-p 5900:5900`).
 
-If VNC does not work and you see an error like the following in the container logs, you can resolve by incrementing the DECONZ_VNC_PORT variable (i.e. to 5901 or 5902). 
+If VNC does not work and you see an error like the following in the container logs, you can resolve by incrementing the DECONZ_VNC_PORT variable (i.e. to 5901 or 5902).
+
 ```
 tigervncserver: /usr/bin/Xtigervnc did not start up, please look into '/root/.vnc/debian:0.log' to determine the reason! -2
 Invalid MIT-MAGIC-COOKIE-1 keyqt.qpa.screen: QXcbConnection: Could not connect to display :0
@@ -345,7 +353,7 @@ Access is through https://hostname:6080/vnc.html, this is a self signed SSL cert
 
 NoVNC acts as a proxy for the VNC server, meaning that if you disable VNC functionality, noVNC will not be available either.
 
-The minimum port for DECONZ_VNC_PORT must be 5900 or higher and the minimum port for DECONZ_NOVNC_PORT must be 6080 or higher. 
+The minimum port for DECONZ_VNC_PORT must be 5900 or higher and the minimum port for DECONZ_NOVNC_PORT must be 6080 or higher.
 
 ### Gotchas / Known Issues
 
@@ -371,15 +379,15 @@ cd deconz-docker
 docker build --build-arg VERSION=`[BUILD_VERSION]` --build-arg CHANNEL=`[BUILD_CHANNEL]` -t "[your-user/]deconz[:local]" ./Docker/
 ```
 
-|Parameter|Description|
-|---------|-----------|
-|`[BUILD_VERSION]`|The version of deCONZ you wish to build.|
-|`[BUILD_CHANNEL]`|The channel (i.e. stable or beta) that corresponds to the deCONZ version you wish to build.|
-|`[your-user/]`|Your username (optional).|
-|`deconz`|The name you want the built Docker image to have on your system (default: deconz).|
-|`[local]`|Adds the tag `:local` to the image (to help differentiate between this image and your locally built image) (optional).|
+| Parameter         | Description                                                                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `[BUILD_VERSION]` | The version of deCONZ you wish to build.                                                                               |
+| `[BUILD_CHANNEL]` | The channel (i.e. stable or beta) that corresponds to the deCONZ version you wish to build.                            |
+| `[your-user/]`    | Your username (optional).                                                                                              |
+| `deconz`          | The name you want the built Docker image to have on your system (default: deconz).                                     |
+| `[local]`         | Adds the tag `:local` to the image (to help differentiate between this image and your locally built image) (optional). |
 
-*Note: VERSION and CHANNEL are required arguments and the image will fail to build if they are not specified.*  
+_Note: VERSION and CHANNEL are required arguments and the image will fail to build if they are not specified._
 
 ### Acknowledgments
 
