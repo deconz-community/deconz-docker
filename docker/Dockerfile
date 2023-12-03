@@ -64,6 +64,10 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Fix for OpenSSL 3 crypto library linkage
+# (pairing w/ install code will not work otherwise and no errors regarding load library failures are logged)
+RUN cd /usr/lib/x86_64-linux-gnu && ln -s libcrypto.so.3 libcrypto.so
+
 # Workaround required on amd64 to address issue #292
 RUN if [ "${TARGETPLATFORM}" = "linux/amd64" ] ; then \
     apt-get update && \
