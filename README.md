@@ -58,8 +58,6 @@ Before running the command that creates the deconz Docker container, you may nee
 sudo usermod -a -G dialout $USER
 ```
 
-For a RaspBee/Raspbee 2 installation on a Raspberry PI 4B : Make sure to have Wiring Pi updated to the latest version! Install instructions can be found on http://wiringpi.com/wiringpi-updated-to-2-52-for-the-raspberry-pi-4b/
-
 #### Command Line
 
 ```bash
