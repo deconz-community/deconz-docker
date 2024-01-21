@@ -52,6 +52,7 @@ RUN apt-get update && \
         libqt5widgets5 \
         libqt5qml5 \
         libssl3 \
+        libssl-dev \
         lsof \
         sqlite3 \
         tigervnc-standalone-server \
@@ -63,11 +64,6 @@ RUN apt-get update && \
         xfonts-scalable && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-# Fix for OpenSSL 3 crypto library linkage on linux/amd64 (status of other platforms unknown)
-# (pairing w/ install code will not work otherwise and no errors regarding load library failures are logged)
-RUN if [ "${TARGETPLATFORM}" = "linux/amd64" ] ; then \
-    cd /usr/lib/x86_64-linux-gnu && ln -s libcrypto.so.3 libcrypto.so ; fi
 
 # Workaround required on amd64 to address issue #292
 RUN if [ "${TARGETPLATFORM}" = "linux/amd64" ] ; then \
