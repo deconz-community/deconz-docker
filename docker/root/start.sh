@@ -11,7 +11,7 @@ echo "[deconzcommunity/deconz] Web UI port: $DECONZ_WEB_PORT"
 echo "[deconzcommunity/deconz] Websockets port: $DECONZ_WS_PORT"
 
 DECONZ_OPTS="--auto-connect=1 \
-        --appdata=/opt/deCONZ \
+        --appdata=$DECONZ_APPDATA_DIR \
         --dbg-info=$DEBUG_INFO \
         --dbg-aps=$DEBUG_APS \
         --dbg-zcl=$DEBUG_ZCL \
