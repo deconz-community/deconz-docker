@@ -80,13 +80,13 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   DECONZ_VNC_DISPLAY=:$(($DECONZ_VNC_PORT - 5900))
   echo "[deconzcommunity/deconz] VNC port: $DECONZ_VNC_PORT"
 
-  if [ ! -e /opt/deCONZ/vnc ]; then
-    mkdir -p /opt/deCONZ/vnc
+  if [ ! -e $DECONZ_APPDATA_DIR/vnc ]; then
+    mkdir -p $DECONZ_APPDATA_DIR/vnc
   fi
 
-  ln -sfT /opt/deCONZ/vnc /home/deconz/.vnc
+  ln -sfT $DECONZ_APPDATA_DIR/vnc /home/deconz/.vnc
   chown deconz:deconz /home/deconz/.vnc
-  chown deconz:deconz /opt/deCONZ -R
+  chown deconz:deconz $DECONZ_APPDATA_DIR -R
 
   echo "[deconzcommunity/deconz] VNC DISABLE PASSWORD: $DECONZ_VNC_DISABLE_PASSWORD"
   if [ "$DECONZ_VNC_DISABLE_PASSWORD" = 0 ]; then
@@ -95,9 +95,9 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
       DECONZ_VNC_PASSWORD=$(cat $DECONZ_VNC_PASSWORD_FILE)
     fi
 
-    echo "$DECONZ_VNC_PASSWORD" | tigervncpasswd -f >/opt/deCONZ/vnc/passwd
-    chmod 600 /opt/deCONZ/vnc/passwd
-    chown deconz:deconz /opt/deCONZ/vnc/passwd
+    echo "$DECONZ_VNC_PASSWORD" | tigervncpasswd -f >$DECONZ_APPDATA_DIR/vnc/passwd
+    chmod 600 $DECONZ_APPDATA_DIR/vnc/passwd
+    chown deconz:deconz $DECONZ_APPDATA_DIR/vnc/passwd
     SECURITYTYPES="VncAuth,TLSVnc"
   else
     SECURITYTYPES="None,TLSNone"
@@ -136,7 +136,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
     fi
 
     # Assert valid SSL certificate
-    NOVNC_CERT="/opt/deCONZ/vnc/novnc.pem"
+    NOVNC_CERT="$DECONZ_APPDATA_DIR/vnc/novnc.pem"
     if [ -f "$NOVNC_CERT" ]; then
       openssl x509 -noout -in "$NOVNC_CERT" -checkend 0 >/dev/null
       if [ $? != 0 ]; then
@@ -168,9 +168,9 @@ if [ "$DECONZ_UPNP" != 1 ]; then
   DECONZ_OPTS="$DECONZ_OPTS --upnp=0"
 fi
 
-mkdir -p /opt/deCONZ/otau
-ln -sfT /opt/deCONZ/otau /home/deconz/otau
+mkdir -p $DECONZ_APPDATA_DIR/otau
+ln -sfT $DECONZ_APPDATA_DIR/otau /home/deconz/otau
 chown deconz:deconz /home/deconz/otau
-chown deconz:deconz /opt/deCONZ -R
+chown deconz:deconz $DECONZ_APPDATA_DIR -R
 
 exec gosu deconz /usr/bin/deCONZ $DECONZ_OPTS
