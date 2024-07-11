@@ -34,7 +34,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     DECONZ_GID=1000 \
     DECONZ_START_VERBOSE=0 \
     DECONZ_BAUDRATE=0 \
-    DECONZ_APPDATA_DIR=/opt/deCONZ
+    DECONZ_APPDATA_DIR=/opt/deCONZ \
     NON_ROOT=0
 
 # Install deCONZ dependencies
