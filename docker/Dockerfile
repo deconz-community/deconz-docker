@@ -1,4 +1,4 @@
-FROM debian:12.2-slim
+FROM debian:12.6-slim
 
 # Build arguments
 ARG VERSION
@@ -35,6 +35,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     DECONZ_START_VERBOSE=0 \
     DECONZ_BAUDRATE=0 \
     DECONZ_APPDATA_DIR=/opt/deCONZ
+    NON_ROOT=0
 
 # Install deCONZ dependencies
 RUN apt-get update && \
