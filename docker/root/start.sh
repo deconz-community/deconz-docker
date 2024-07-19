@@ -25,6 +25,12 @@ DECONZ_OPTS="--auto-connect=1 \
         --http-port=$DECONZ_WEB_PORT \
         --ws-port=$DECONZ_WS_PORT"
 
+if [ "$NON_ROOT" = 0 ]; then 
+  GOSU="gosu deconz"
+else
+  GOSU=""
+fi
+
 if [ "$DECONZ_BAUDRATE" != 0 ]; then
   DECONZ_OPTS="$DECONZ_OPTS --baudrate=$DECONZ_BAUDRATE"
 fi
@@ -114,8 +120,8 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   fi
 
   # Cleanup previous VNC session data
-  gosu deconz tigervncserver -kill ':*'
-  gosu deconz tigervncserver -list ':*' -cleanstale
+  $GOSU tigervncserver -kill ':*'
+  $GOSU tigervncserver -list ':*' -cleanstale
   for lock in "/tmp/.X${DECONZ_VNC_DISPLAY#:}-lock" "/tmp/.X11-unix/X${DECONZ_VNC_DISPLAY#:}"; do
     [ -e "$lock" ] || continue
     echo "[deconzcommunity/deconz] WARN - VNC-lock found. Deleting: $lock"
@@ -123,7 +129,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   done
 
   # Set VNC security
-  gosu deconz tigervncserver -SecurityTypes "$SECURITYTYPES" "$DECONZ_VNC_DISPLAY"
+  $GOSU tigervncserver -SecurityTypes "$SECURITYTYPES" "$DECONZ_VNC_DISPLAY"
 
   # Export VNC display variable
   export DISPLAY=$DECONZ_VNC_DISPLAY
@@ -152,7 +158,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
     chown deconz:deconz $NOVNC_CERT
 
     #Start noVNC
-    gosu deconz websockify -D --web=/usr/share/novnc/ --cert="$NOVNC_CERT" $DECONZ_NOVNC_PORT localhost:$DECONZ_VNC_PORT
+    $GOSU websockify -D --web=/usr/share/novnc/ --cert="$NOVNC_CERT" $DECONZ_NOVNC_PORT localhost:$DECONZ_VNC_PORT
     echo "[deconzcommunity/deconz] NOVNC port: $DECONZ_NOVNC_PORT"
   fi
 
@@ -174,4 +180,4 @@ ln -sfT $DECONZ_APPDATA_DIR/otau /home/deconz/otau
 chown deconz:deconz /home/deconz/otau
 chown deconz:deconz $DECONZ_APPDATA_DIR -R
 
-exec gosu deconz /usr/bin/deCONZ $DECONZ_OPTS
+exec $GOSU /usr/bin/deCONZ $DECONZ_OPTS
