@@ -185,8 +185,9 @@ To disable the login shell over serial and enable the serial port hardware:
 To swap Bluetooth to /dev/S0 (moving RaspBee to /dev/ttyAMA0), run the following command and then reboot:
 
 ```bash
-echo 'dtoverlay=pi3-miniuart-bt' | sudo tee -a /boot/config.txt
+echo 'dtoverlay=pi3-miniuart-bt' | sudo tee -a /boot/firmware/config.txt
 ```
+Note: On Raspbian / Debian versions earlier than Bookworm the config is located under /boot/config.txt.
 
 After running the above command and rebooting, RaspBee should be available at /dev/ttyAMA0.
 
