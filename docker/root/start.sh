@@ -102,7 +102,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
       DECONZ_VNC_PASSWORD=$(cat $DECONZ_VNC_PASSWORD_FILE)
     fi
 
-    echo "$DECONZ_VNC_PASSWORD" | tigervncpasswd -f >$DECONZ_APPDATA_DIR/vnc/passwd
+    $GOSU echo "$DECONZ_VNC_PASSWORD" | tigervncpasswd -f >$DECONZ_APPDATA_DIR/vnc/passwd
     chmod 600 $DECONZ_APPDATA_DIR/vnc/passwd
     chown deconz:deconz $DECONZ_APPDATA_DIR/vnc/passwd
     SECURITYTYPES="VncAuth,TLSVnc"
