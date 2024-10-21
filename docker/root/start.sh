@@ -91,8 +91,8 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
     mkdir -p $DECONZ_APPDATA_DIR/vnc
   fi
 
-  ln -sfT $DECONZ_APPDATA_DIR/vnc /home/deconz/.vnc
-  chown deconz:deconz /home/deconz/.vnc
+  #ln -sfT $DECONZ_APPDATA_DIR/vnc /home/deconz/.vnc
+  #chown deconz:deconz /home/deconz/.vnc
   chown deconz:deconz $DECONZ_APPDATA_DIR -R
 
   echo "[deconzcommunity/deconz] VNC DISABLE PASSWORD: $DECONZ_VNC_DISABLE_PASSWORD"
@@ -102,7 +102,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
       DECONZ_VNC_PASSWORD=$(cat $DECONZ_VNC_PASSWORD_FILE)
     fi
 
-    $GOSU echo "$DECONZ_VNC_PASSWORD" | tigervncpasswd -f >$DECONZ_APPDATA_DIR/vnc/passwd
+    echo "$DECONZ_VNC_PASSWORD" | tigervncpasswd -f >$DECONZ_APPDATA_DIR/vnc/passwd
     chmod 600 $DECONZ_APPDATA_DIR/vnc/passwd
     chown deconz:deconz $DECONZ_APPDATA_DIR/vnc/passwd
     SECURITYTYPES="VncAuth,TLSVnc"
