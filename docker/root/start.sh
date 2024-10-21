@@ -91,8 +91,8 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
     mkdir -p $DECONZ_APPDATA_DIR/vnc
   fi
 
-  #ln -sfT $DECONZ_APPDATA_DIR/vnc /home/deconz/.vnc
-  #chown deconz:deconz /home/deconz/.vnc
+  ln -sfT $DECONZ_APPDATA_DIR/vnc /home/deconz/.vnc
+  chown deconz:deconz /home/deconz/.vnc
   chown deconz:deconz $DECONZ_APPDATA_DIR -R
 
   echo "[deconzcommunity/deconz] VNC DISABLE PASSWORD: $DECONZ_VNC_DISABLE_PASSWORD"
@@ -129,7 +129,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   done
 
   # Set VNC security
-  $GOSU tigervncserver -SecurityTypes "$SECURITYTYPES" "$DECONZ_VNC_DISPLAY"
+  $GOSU tigervncserver -SecurityTypes "$SECURITYTYPES" -PasswordFile $DECONZ_APPDATA_DIR/vnc/passwd "$DECONZ_VNC_DISPLAY"
 
   # Export VNC display variable
   export DISPLAY=$DECONZ_VNC_DISPLAY
