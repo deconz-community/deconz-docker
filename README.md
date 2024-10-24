@@ -115,7 +115,7 @@ Use these environment variables to change the default behaviour of the container
 | `-e DECONZ_START_VERBOSE=0`                          | Set this option to 0 to disable verbose of start script, set to 1 to enable `set -x` logging                                                                                                                                                                                                            |
 | `-e DECONZ_BAUDRATE=115200`                          | Set the baudrate of the conbee stick, for conbee 3 this needs to be set                                                                                                                                                                                                                                 |
 | `-e DECONZ_APPDATA_DIR=/opt/deCONZ`                  | Set an alternative appdata directory incase volume bindings are not possible, eg Home Assistant OS #232                                                                                                                                                                                                 |
-| `-e NON_ROOT=0                                       | Set this option to 1 to enable NON ROOT exectution of deconz    
+| `-e NON_ROOT=0`                                      | Set this option to 1 to enable NON ROOT exectution of deconz    
                                                                                                                          |
 
 #### Docker-Compose
