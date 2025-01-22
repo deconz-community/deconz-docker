@@ -64,6 +64,7 @@ sudo usermod -a -G dialout $USER
 docker run -d \
     --name=deconz \
     --restart=always \
+    --privileged \
     -p 80:80 \
     -p 443:443 \
     -v /etc/localtime:/etc/localtime:ro \
