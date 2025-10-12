@@ -6,6 +6,14 @@ If you're using a ConBee 3 stick, you need to set the following environment vari
 DECONZ_BAUDRATE=115200
 ```
 
+## Notes for RaspBeeII users
+
+If you're using a RaspBee II device, you need to set the following environment variable for deCONZ to pick be able to communicate with the stick:
+
+```
+DECONZ_BAUDRATE=38400
+```
+
 ## Notes for Synology users
 
 We've had numerous reports of issues when deCONZ is run as an unprivileged user, which is the default behaviour. Because of this, it is highly recommended that you run deCONZ as root. To do so, set the following two environment variables:
