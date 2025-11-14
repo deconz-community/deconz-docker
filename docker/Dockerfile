@@ -46,7 +46,7 @@ RUN apt-get update && \
         udev \
         libatomic1 \
         libcap2-bin \
-        libqt5core5 \
+        libqt5core5a \
         libqt5gui5 \
         libqt5network5 \
         libqt5serialport5 \
@@ -54,7 +54,7 @@ RUN apt-get update && \
         libqt5websockets5 \
         libqt5widgets5 \
         libqt5qml5 \
-        libssl3t64 \
+        libssl3 \
         libssl-dev \
         lsof \
         sqlite3 \
