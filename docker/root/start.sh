@@ -23,6 +23,7 @@ DECONZ_OPTS="--auto-connect=1 \
         --dbg-http=$DEBUG_HTTP \
         --dev-test-managed=$DECONZ_DEV_TEST_MANAGED \
         --http-port=$DECONZ_WEB_PORT \
+        --https-port=$DECONZ_WEBS_PORT \
         --ws-port=$DECONZ_WS_PORT"
 
 if [ "$NON_ROOT" = 0 ]; then 
