@@ -1,9 +1,9 @@
 ---
-name: Build and push dev image
+name: Build and push release image
 
 on:
-  pull_request:
-    types: [labeled]
+  push:
+    branches: ['main']
     paths:
       - 'docker/**'
       - 'version.json'
@@ -14,8 +14,7 @@ permissions:
   packages: write
 
 jobs:
-  dev-build:
-    if: contains(github.event.label.name, 'Dev')
+  release-build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -47,6 +46,13 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get metadata
+        id: info
+        uses: notiz-dev/github-action-json-property@release
+        with:
+            path: 'version.json'
+            prop_path: 'version'
+
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -57,9 +63,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
-            deconzcommunity/deconz:dev
-            ghcr.io/${{ github.repository }}:dev
+            deconzcommunity/deconz:latest
+            deconzcommunity/deconz:${{ steps.info.outputs.prop }}
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ steps.info.outputs.prop }}
           labels: |
             org.opencontainers.image.vendor=${{ github.repository_owner }}
             org.opencontainers.image.revision=${{ github.sha }}
-            development-build=true
