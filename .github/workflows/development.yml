@@ -3,7 +3,10 @@ name: Build and push dev image
 
 on:
   pull_request:
-    types: [labeled]
+    types: 
+      - opened      # Triggers when the PR is first created
+      - synchronize # Triggers whenever you push new commits to the PR branch
+      - reopened    # Triggers if you close and reopen the PR
     paths:
       - 'docker/**'
       - 'version.json'
