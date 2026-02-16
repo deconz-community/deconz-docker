@@ -46,12 +46,19 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get metadata
-        id: info
+      - name: Get version
+        id: version # ID veranderd naar 'version' voor duidelijkheid
         uses: notiz-dev/github-action-json-property@release
         with:
             path: 'version.json'
             prop_path: 'version'
+
+      - name: Get channel
+        id: channel # Nieuwe stap om channel op te halen
+        uses: notiz-dev/github-action-json-property@release
+        with:
+            path: 'version.json'
+            prop_path: 'channel'
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -60,13 +67,18 @@ jobs:
           file: ${{ matrix.dockerfile }}
           platforms: ${{ matrix.platforms }}
           push: true
+          build-args: |
+            VERSION=${{ steps.version.outputs.prop }}
+            CHANNEL=${{ steps.channel.outputs.prop }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
             deconzcommunity/deconz:latest
-            deconzcommunity/deconz:${{ steps.info.outputs.prop }}
+            deconzcommunity/deconz:${{ steps.version.outputs.prop }}
+            deconzcommunity/deconz:${{ steps.channel.outputs.prop }}
             ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ steps.info.outputs.prop }}
+            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.prop }}
+            ghcr.io/${{ github.repository }}:${{ steps.channel.outputs.prop }}
           labels: |
             org.opencontainers.image.vendor=${{ github.repository_owner }}
             org.opencontainers.image.revision=${{ github.sha }}
