@@ -32,6 +32,15 @@ See [Configuring deCONZ Container for Conbee II on Raspberry Pi](#configuring-de
 
 ---
 
+## Notes for ALEXA users
+
+If you're using Alexa and there is a massive delay with reaction after giving a command you have to change the websocket port to 8443. The easiest way to do is if you are using docker compose. So you'll have to change the specific environment variable to 
+
+```
+DECONZ_WS_PORT=8443
+```
+
+
 ## deCONZ Docker Image
 
 This Docker image containerizes the deCONZ software from dresden elektronik, which controls a ZigBee network using a Conbee USB or RaspBee GPIO serial interface. This image runs deCONZ in "minimal" mode, for control of the ZigBee network via the WebUIs ("Wireless Light Control" and "Phoscon") and over the REST API and Websockets, and optionally runs a VNC server for viewing and interacting with the ZigBee mesh through the deCONZ UI.
