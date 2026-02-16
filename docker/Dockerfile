@@ -41,6 +41,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Install deCONZ dependencies
 RUN apt-get update && \
     apt-get install -y \
+        wget \
+	gnupg \
         gosu \
         curl \
         kmod \
@@ -89,13 +91,15 @@ RUN groupadd -g ${DECONZ_GID} "deconz" && \
 
 # Add deCONZ, install deCONZ, make OTAU dir
 COPY download-deconz.sh /
+RUN chmod +x /download-deconz.sh && \
+    /download-deconz.sh ${VERSION} ${CHANNEL} ${TARGETPLATFORM}
 
-RUN chmod +x /download-deconz.sh && /download-deconz.sh ${VERSION} ${CHANNEL} ${TARGETPLATFORM}
-
-RUN dpkg -i /deconz.deb && \
+# Conditional Install: Only run dpkg if the .deb exists (for arm64/v7)
+RUN if [ -f /deconz.deb ]; then \
+        dpkg -i /deconz.deb && rm /deconz.deb; \
+    fi && \
     chown root:root /usr/bin/deCONZ* && \
-    setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/deCONZ && \
-    rm -f /deconz.deb
+    setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/deCONZ
 
 VOLUME [ "/opt/deCONZ" ]
 
