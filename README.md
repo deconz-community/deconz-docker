@@ -209,7 +209,6 @@ Using a docker compose file is the easiest to do so, and you need to make sure t
 Here is an example of a docker-compose file:
 
 ```yaml
-version: "3"
 services:
   deconz:
     image: deconzcommunity/deconz:stable
@@ -241,10 +240,10 @@ Also note, that the USB device where Conbee II is installed needs to be mapped i
 To find out which path Conbee II is on, you can use the following command:
 
 ```shell
-ls -al /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2251419-if00
+ls -al /dev/serial/by-id/
 
 # output:
-lrwxrwxrwx 1 root root 13 Jul 23 00:13 /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2251419-if00 -> ../../ttyACM0
+lrwxrwxrwx 1 root root 13 Jul 23 00:13 /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_XXXXXXX-if00 -> ../../ttyACM0
 ```
 
 Note the symbolic link pointing to `/dev/ttyACM0`. That's the serial device that Conbee II USB Stick is occupying!
