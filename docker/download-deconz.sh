@@ -7,8 +7,6 @@ CHANNEL=$2
 PLATFORM=$3
 
 if [[ "$PLATFORM" == *"amd64"* ]]; then
-    apt-get update && apt-get install -y gnupg2 wget
-    
     # Download key to the modern keyring location
     wget -O - http://phoscon.de/apt/deconz.pub.key | gpg --dearmor -o /usr/share/keyrings/deconz.gpg
     

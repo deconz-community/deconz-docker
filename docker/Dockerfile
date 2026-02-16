@@ -41,6 +41,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Install deCONZ dependencies
 RUN apt-get update && \
     apt-get install -y \
+        wget \
+	gnupg \
         gosu \
         curl \
         kmod \
