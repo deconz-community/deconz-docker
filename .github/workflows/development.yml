@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   dev-build:
-    if: contains(github.event.label.name, 'Dev')
+    if: success() && contains(github.event.pull_request.labels.*.name, 'Dev')
     runs-on: ubuntu-latest
     strategy:
       matrix:
