@@ -3,30 +3,24 @@
 set -ex
 
 DECONZ_VERSION=$1
-CHANNEL=$2 # stable or beta
+CHANNEL=$2
 PLATFORM=$3
 
-# Map "generic-beta" for APT if channel is beta
-APT_CHANNEL="generic"
-if [ "${CHANNEL}" = "beta" ]; then
-    APT_CHANNEL="generic-beta"
-fi
-
-if echo "${PLATFORM}" | grep -qE "amd64"; then
-    # 1. Install Repo GPG Key
-    curl -sL http://phoscon.de/apt/deconz.pub.key | apt-key add -
-
-    # 2. Add Repository
-    echo "deb [arch=amd64] http://phoscon.de/apt/deconz ${APT_CHANNEL} main" > /etc/apt/sources.list.d/deconz.list
-
-    # 3. Install via APT
+if [[ "$PLATFORM" == *"amd64"* ]]; then
+    apt-get update && apt-get install -y gnupg2 wget
+    
+    # Download key to the modern keyring location
+    wget -O - http://phoscon.de/apt/deconz.pub.key | gpg --dearmor -o /usr/share/keyrings/deconz.gpg
+    
+    APT_CHANNEL="generic"
+    if [ "$CHANNEL" == "beta" ]; then APT_CHANNEL="generic-beta"; fi
+    
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/deconz.gpg] http://phoscon.de/apt/deconz ${APT_CHANNEL} main" > /etc/apt/sources.list.d/deconz.list
+    
     apt-get update
-    # Note: We install a specific version if provided, otherwise latest
-    apt-get install -y deconz="${DECONZ_VERSION}*" || apt-get install -y deconz
-
-    # Create a dummy file so the Dockerfile dpkg command doesn't fail,
-    # or we can handle the logic in the Dockerfile (see below).
-    touch /deconz_installed_via_apt
+    apt-get install -y deconz
+    # Create a flag so the Dockerfile knows skip dpkg
+    touch /tmp/apt_installed
     exit 0
 fi
 
