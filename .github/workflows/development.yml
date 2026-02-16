@@ -7,6 +7,7 @@ on:
       - opened      # Triggers when the PR is first created
       - synchronize # Triggers whenever you push new commits to the PR branch
       - reopened    # Triggers if you close and reopen the PR
+      - labeled
     paths:
       - 'docker/**'
       - 'version.json'
