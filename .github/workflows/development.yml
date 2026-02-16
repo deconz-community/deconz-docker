@@ -47,6 +47,21 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Metadata ophalen is ook voor Dev essentieel voor het download-script
+      - name: Get version
+        id: version
+        uses: notiz-dev/github-action-json-property@release
+        with:
+            path: 'version.json'
+            prop_path: 'version'
+
+      - name: Get channel
+        id: channel
+        uses: notiz-dev/github-action-json-property@release
+        with:
+            path: 'version.json'
+            prop_path: 'channel'
+
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -54,6 +69,10 @@ jobs:
           file: ${{ matrix.dockerfile }}
           platforms: ${{ matrix.platforms }}
           push: true
+          # Hier voegen we de missende args weer toe
+          build-args: |
+            VERSION=${{ steps.version.outputs.prop }}
+            CHANNEL=${{ steps.channel.outputs.prop }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
