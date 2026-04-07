@@ -1,3 +1,11 @@
+## Notes for Alexa users
+
+If you are using Alexa and experiencing significant command response delays, you must set the WebSocket port to 8443. If you are using Docker Compose, set the following environment variable:
+
+```
+DECONZ_WS_PORT=8443
+```
+
 ## Notes for ConBee 3 users
 
 If you're using a ConBee 3 stick, you need to set the following environment variable for deCONZ to be able to communicate with the stick:
