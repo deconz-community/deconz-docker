@@ -1,6 +1,6 @@
 # deCONZ Docker Image
 
-Docker image for running deCONZ (Phoscon, REST API, WebSocket API, optional VNC/noVNC) with ConBee and RaspBee adapters.
+This repository provides a Docker image for running deCONZ with ConBee and RaspBee adapters. The container includes Phoscon, the REST API, the WebSocket API, and optional VNC/noVNC access for mesh visualization.
 
 - Architectures: `amd64`, `arm/v7`, `arm64`
 - Registries:
@@ -16,20 +16,30 @@ Docker image for running deCONZ (Phoscon, REST API, WebSocket API, optional VNC/
 
 ## Quick Start
 
-1. Copy `docker-compose.yml` from this repo.
-2. Update `TZ`, `DECONZ_DEVICE`, and your volume path.
-3. Start it:
+If you want a straightforward first setup, the steps below are usually enough to get deCONZ running.
+
+1. Copy `docker-compose.yml` from this repository to your host.
+2. Edit the compose file and set at least the following values:
+   - `TZ` to your local timezone (for correct scheduling and logs)
+   - `DECONZ_DEVICE` to your adapter path (for example `/dev/ttyACM0`)
+   - the data volume path (for example `/opt/deconz:/opt/deCONZ`)
+3. Pull and start the container:
 
 ```bash
 docker compose pull
 docker compose up -d
 ```
 
-4. Open Phoscon: `http://<host-ip>:<DECONZ_WEB_PORT>`
+4. Open Phoscon in your browser: `http://<host-ip>:<DECONZ_WEB_PORT>`.
 
-Use `docker compose down` to stop.
+Use `docker compose down` when you want to stop the container.
+
+> [!TIP]
+> If your adapter is not detected on first boot, set `DECONZ_DEVICE` explicitly and restart once.
 
 ## Most Used Settings
+
+Most installations only need a small set of settings. In practice, the values below are the most relevant for first setup and day-to-day operation.
 
 | Variable | Typical value | Purpose |
 | --- | --- | --- |
@@ -42,15 +52,17 @@ Use `docker compose down` to stop.
 <details>
 <summary>Hardware-specific notes</summary>
 
-- **Alexa delays**: set `DECONZ_WS_PORT=8443` and match published port mapping.
+- **Alexa delays**: set `DECONZ_WS_PORT=8443` and make sure the published port mapping matches this value.
 - **ConBee III**: set `DECONZ_BAUDRATE=115200`.
 - **RaspBee II**: set `DECONZ_BAUDRATE=38400`.
-- **Synology permission issues**: try `DECONZ_UID=0` and `DECONZ_GID=0`.
+- **Synology permission issues**: if USB access fails, try `DECONZ_UID=0` and `DECONZ_GID=0`.
 
 </details>
 
 <details>
 <summary>Environment variables (full list)</summary>
+
+The following table includes all supported runtime variables exposed by this image. Defaults are shown so you can quickly see what changes are optional.
 
 | Variable | Default | Description |
 | --- | --- | --- |
@@ -86,20 +98,27 @@ Use `docker compose down` to stop.
 
 ## Networking
 
-- Bridge networking: publish ports you use (`80`, `443`, optional `5900`, `6080`).
-- If you change `DECONZ_WS_PORT`, both sides of the mapping must match (for example `4443:4443`).
-- Host networking (`network_mode: host`): do not use `ports:`.
+deCONZ works well with both bridge and host networking, but it is important to keep port values and mappings aligned with your chosen mode.
+
+- Bridge networking: publish the ports you actually use (`80`, `443`, and optionally `5900`, `6080` for VNC/noVNC).
+- If you change `DECONZ_WS_PORT`, both sides of the port mapping must match (for example `4443:4443`).
+- Host networking (`network_mode: host`): do not use `ports:` in the compose file.
+
+> [!NOTE]
+> If Alexa commands are delayed, the most common fix is `DECONZ_WS_PORT=8443` with matching port mapping.
 
 ## Troubleshooting
 
-- Device not found: set `DECONZ_DEVICE` explicitly and check `ls -al /dev/serial/by-id/`.
-- VNC lock/cookie errors: increment `DECONZ_VNC_PORT` (for example `5901`) and restart.
+If startup does not behave as expected, the checks below cover the most common causes.
+
+- Device not found: set `DECONZ_DEVICE` explicitly and verify the adapter path using `ls -al /dev/serial/by-id/`.
+- VNC lock/cookie errors: increment `DECONZ_VNC_PORT` (for example `5901`) and restart the container.
 - noVNC URL: `https://<host>:<DECONZ_NOVNC_PORT>/vnc.html`.
 
 <details>
 <summary>RaspBee on Raspberry Pi (serial setup)</summary>
 
-Raspbian often assigns serial/Bluetooth in a way that conflicts with RaspBee.
+Raspbian often assigns serial and Bluetooth devices in a way that conflicts with RaspBee, so this one-time host configuration is sometimes required.
 
 1. Run `sudo raspi-config`.
 2. Go to `Interfacing Options` -> `Serial`.
@@ -120,26 +139,28 @@ On older systems use `/boot/config.txt`.
 <details>
 <summary>ConBee II on Raspberry Pi (privileged fallback)</summary>
 
-If adapter access fails on Raspberry Pi, try `privileged: true` in Compose.
+If adapter access fails on Raspberry Pi, adding `privileged: true` in Compose can help in environments with stricter USB access behavior.
 
 </details>
 
 <details>
 <summary>Firmware updates (ConBee/RaspBee)</summary>
 
-Use [GCFFlasher](https://github.com/dresden-elektronik/gcfflasher):
+Use [GCFFlasher](https://github.com/dresden-elektronik/gcfflasher) for firmware updates:
 
 1. Stop deCONZ (`docker stop deconz` or `docker compose down`).
-2. Download firmware from <https://deconz.dresden-elektronik.de/deconz-firmware>.
+2. Download the correct firmware from <https://deconz.dresden-elektronik.de/deconz-firmware>.
 3. Detect adapter: `GCFFlasher4 -l`.
 4. Flash: `GCFFlasher4 -f <firmware-file> -d <device>`.
-5. Restart container.
+5. Restart the container.
 
 OTAU files are expected in `/opt/deCONZ/otau` inside the container.
 
 </details>
 
 ## Upgrading and Rollback
+
+Upgrades are usually straightforward, but backing up your application data first makes rollback much safer if you need to return to a previous image tag.
 
 - Back up app data (`/opt/deCONZ`) before upgrades.
 - Upgrade:
@@ -149,7 +170,10 @@ docker compose pull
 docker compose up -d
 ```
 
-- Roll back: pin an older image tag in Compose, then run `docker compose up -d`.
+- Roll back: pin an older image tag in Compose and run `docker compose up -d` again.
+
+> [!IMPORTANT]
+> Keep a backup of `/opt/deCONZ` before major version upgrades so rollback is predictable and quick.
 
 <details>
 <summary>Build locally</summary>
@@ -165,6 +189,8 @@ docker build --build-arg VERSION=<version> --build-arg CHANNEL=<stable|beta> -t 
 </details>
 
 ## Issues and Contributing
+
+If you run into image-specific issues, please open an issue in this repository. Contributions are welcome, and for smaller ideas or questions it is often helpful to discuss in an issue first.
 
 - Issues: <https://github.com/deconz-community/deconz-docker/issues>
 - PRs welcome; for small questions, opening an issue first can be faster.
