@@ -19,7 +19,7 @@ services:
       - DEBUG_APS=0
       - DEBUG_ZCL=0
       - DEBUG_ZDP=0
-      - DEBUG_OTAU=0
+      - DEBUG_OTA=0
       - DEBUG_HTTP=0
       - DECONZ_DEVICE=/dev/ttyUSB0
       - DECONZ_VNC_MODE=1
