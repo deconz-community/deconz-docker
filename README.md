@@ -14,6 +14,27 @@ This repository provides a Docker image for running deCONZ with ConBee and RaspB
 | beta    | Beta releases only                           |
 | version | Specific version tag, e.g. `2.13.02`         |
 
+## Platform Support
+
+Current production images use Debian 12 (Bookworm), with Debian LTS through 2028-06-30. Supported production targets are `amd64`, `arm/v7`, and `arm64`.
+
+| Target | deCONZ package origin |
+| --- | --- |
+| `amd64` | Dresden Elektronik Ubuntu package |
+| `arm/v7` | Dresden Elektronik Raspbian package |
+| `arm64` | Dresden Elektronik Debian package |
+
+Upgrades require an `/opt/deCONZ` backup and a rollback test before production use.
+
+## Debian 13 (Trixie) Promotion Policy
+
+Debian 13 (Trixie) is a candidate base, not a production base. It must not be promoted until all of these gates pass:
+
+- Build, install, and start smoke checks on `amd64`, `arm/v7`, and `arm64`.
+- Hardware USB and GID access checks with supported adapters.
+- Persistence checks covering upgrade and rollback with `/opt/deCONZ` data.
+- Vendor deCONZ package compatibility for each architecture and its package origin.
+
 ## Quick Start
 
 If you want a straightforward first setup, the steps below are usually enough to get deCONZ running.
@@ -162,7 +183,7 @@ OTAU files are expected in `/opt/deCONZ/otau` inside the container.
 
 Upgrades are usually straightforward, but backing up your application data first makes rollback much safer if you need to return to a previous image tag.
 
-- Back up app data (`/opt/deCONZ`) before upgrades.
+- Back up app data (`/opt/deCONZ`) before upgrades and test rollback before production use.
 - Upgrade:
 
 ```bash

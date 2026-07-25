@@ -1,4 +1,6 @@
-FROM debian:12-slim
+# Debian 12 Bookworm OCI image index. Dependabot keeps this reviewed digest current.
+ARG BASE_IMAGE=debian:12-slim@sha256:7b140f374b289a7c2befc338f42ebe6441b7ea838a042bbd5acbfca6ec875818
+FROM ${BASE_IMAGE}
 
 # Build arguments
 ARG VERSION
@@ -90,7 +92,10 @@ RUN groupadd -g ${DECONZ_GID} "deconz" && \
 # Add deCONZ, install deCONZ, make OTAU dir
 COPY download-deconz.sh /
 
-RUN chmod +x /download-deconz.sh && /download-deconz.sh ${VERSION} ${CHANNEL} ${TARGETPLATFORM}
+RUN test -n "${VERSION}" && \
+    test -n "${CHANNEL}" && \
+    chmod +x /download-deconz.sh && \
+    /download-deconz.sh ${VERSION} ${CHANNEL} ${TARGETPLATFORM}
 
 RUN dpkg -i /deconz.deb && \
     chown root:root /usr/bin/deCONZ* && \
