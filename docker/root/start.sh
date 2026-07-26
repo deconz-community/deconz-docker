@@ -6,9 +6,9 @@ fi
 
 as_deconz() {
   if [ "$NON_ROOT" = 0 ]; then
-    setpriv --reuid=deconz --regid=deconz --init-groups --inh-caps=-all -- "$@"
+    HOME=/home/deconz setpriv --reuid=deconz --regid=deconz --init-groups --inh-caps=-all -- "$@"
   else
-    "$@"
+    HOME=/home/deconz "$@"
   fi
 }
 
@@ -50,6 +50,7 @@ if [ "$DECONZ_GID" != 1000 ]; then
 fi
 
 echo "[deconzcommunity/deconz] Checking device group ID"
+DEVICE=
 if [ "$DECONZ_DEVICE" != 0 ]; then
   DEVICE=$DECONZ_DEVICE
 else
@@ -67,16 +68,19 @@ else
   fi
 fi
 
-DIALOUTGROUPID=$(stat --printf='%g' $DEVICE)
-DIALOUTGROUPID=${DIALOUTGROUPID:-20}
+if [ -n "$DEVICE" ] && [ -e "$DEVICE" ]; then
+  DIALOUTGROUPID=$(stat --printf='%g' -- "$DEVICE")
+
+  #workaround if the group of the device doesn't have any permissions
+  GROUPPERMISSIONS=$(stat -c "%A" -- "$DEVICE" | cut -c 5-7)
+  if [ "$GROUPPERMISSIONS" = "---" ]; then
+    chmod g+rw -- "$DEVICE"
+  fi
+else
+  DIALOUTGROUPID=20
+fi
 if [ "$DIALOUTGROUPID" != 20 ]; then
   groupmod -o -g "$DIALOUTGROUPID" dialout
-fi
-
-#workaround if the group of the device doesn't have any permissions
-GROUPPERMISSIONS=$(stat -c "%A" $DEVICE | cut -c 5-7)
-if [ "$GROUPPERMISSIONS" = "---" ]; then
-  chmod g+rw $DEVICE
 fi
 
 if [ "$DECONZ_VNC_MODE" != 0 ]; then
@@ -183,7 +187,7 @@ chown deconz:deconz /home/deconz/otau
 chown deconz:deconz $DECONZ_APPDATA_DIR -R
 
 if [ "$NON_ROOT" = 0 ]; then
-  exec setpriv --reuid=deconz --regid=deconz --init-groups --inh-caps=-all -- /usr/bin/deCONZ $DECONZ_OPTS
+  exec env HOME=/home/deconz setpriv --reuid=deconz --regid=deconz --init-groups --inh-caps=-all -- /usr/bin/deCONZ $DECONZ_OPTS
 else
   exec /usr/bin/deCONZ $DECONZ_OPTS
 fi

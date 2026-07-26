@@ -150,3 +150,40 @@ jobs:
 
           run_case default 0 1000 1000
           run_case root-fallback 1 0 0
+
+          if [ "$PLATFORM" = linux/amd64 ]; then
+            suffix="${platform_tag}-vnc-no-device-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+            container="gosu-runtime-${suffix}"
+            volume="gosu-runtime-data-${suffix}"
+
+            cleanup_vnc() {
+              docker logs "$container" || true
+              docker rm -f "$container" || true
+              docker volume rm -f "$volume" || true
+            }
+            trap cleanup_vnc EXIT
+
+            docker volume create "$volume" >/dev/null
+            docker run -d --name "$container" \
+              --volume "$volume:/opt/deCONZ" \
+              --publish 127.0.0.1::80 \
+              --env NON_ROOT=0 \
+              --env DECONZ_DEVICE=0 \
+              --env DECONZ_VNC_MODE=1 \
+              --env DECONZ_VNC_DISABLE_PASSWORD=1 \
+              "$image" >/dev/null
+
+            sleep 10
+            if ! docker inspect --format '{{.State.Running}}' "$container" | grep -qx true; then
+              echo "VNC container exited" >&2
+              exit 1
+            fi
+            if docker logs "$container" 2>&1 | grep -Fq 'stat: missing operand'; then
+              echo "VNC startup attempted stat without a device" >&2
+              exit 1
+            fi
+            if docker logs "$container" 2>&1 | grep -Fq '/root/.vnc'; then
+              echo "TigerVNC used /root/.vnc" >&2
+              exit 1
+            fi
+          fi
