@@ -20,10 +20,10 @@ jobs:
       grype_config: ${{ steps.render.outputs.grype_config }}
     steps:
       - name: Checkout current workspace for bootstrap fallback
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Checkout trusted policy
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
           path: policy
@@ -60,7 +60,7 @@ jobs:
       APPDATA_VOLUME: deconz-ci-bookworm-${{ matrix.target.name }}-appdata
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Restore validated Grype config
         run: |
@@ -68,10 +68,10 @@ jobs:
           printf '%s' '${{ needs.validate-grype-exceptions.outputs.grype_config }}' | base64 --decode > .grype.yaml
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
 
       - name: Set up Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Read build inputs
         id: inputs
@@ -80,7 +80,7 @@ jobs:
           echo "channel=$(jq -r '.channel' version.json)" >> "$GITHUB_OUTPUT"
 
       - name: Build local image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: ./docker/
           file: docker/Dockerfile
@@ -127,7 +127,7 @@ jobs:
           exit 1
 
       - name: Scan local image
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           image: ${{ env.IMAGE_TAG }}
           output-format: table
@@ -139,7 +139,7 @@ jobs:
 
       - name: Upload vulnerability report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: grype-bookworm-${{ matrix.target.name }}
           path: ${{ runner.temp }}/grype-bookworm-${{ matrix.target.name }}.txt
@@ -167,7 +167,7 @@ jobs:
       APPDATA_VOLUME: deconz-ci-trixie-${{ matrix.target.name }}-appdata
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Restore validated Grype config
         run: |
@@ -175,10 +175,10 @@ jobs:
           printf '%s' '${{ needs.validate-grype-exceptions.outputs.grype_config }}' | base64 --decode > .grype.yaml
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
 
       - name: Set up Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Read build inputs
         id: inputs
@@ -187,7 +187,7 @@ jobs:
           echo "channel=$(jq -r '.channel' version.json)" >> "$GITHUB_OUTPUT"
 
       - name: Build local image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: ./docker/
           file: docker/Dockerfile
@@ -234,7 +234,7 @@ jobs:
           exit 1
 
       - name: Scan local image
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           image: ${{ env.IMAGE_TAG }}
           output-format: table
@@ -246,7 +246,7 @@ jobs:
 
       - name: Upload vulnerability report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: grype-trixie-${{ matrix.target.name }}
           path: ${{ runner.temp }}/grype-trixie-${{ matrix.target.name }}.txt
