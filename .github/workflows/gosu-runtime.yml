@@ -1,0 +1,142 @@
+---
+name: gosu runtime smoke
+
+on:
+  pull_request:
+    paths:
+      - 'docker/**'
+      - 'version.json'
+      - '.github/workflows/gosu-runtime.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gosu-runtime-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  runtime:
+    name: ${{ matrix.platform }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
+          - linux/arm/v7
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read image version
+        id: version
+        run: |
+          set -euo pipefail
+          printf 'version=%s\n' "$(python3 -c 'import json; print(json.load(open("version.json"))["version"])')" >> "$GITHUB_OUTPUT"
+          printf 'channel=%s\n' "$(python3 -c 'import json; print(json.load(open("version.json"))["channel"])')" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build local image
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          VERSION: ${{ steps.version.outputs.version }}
+          CHANNEL: ${{ steps.version.outputs.channel }}
+        run: |
+          set -euo pipefail
+          platform_tag="${PLATFORM//\//-}"
+          docker buildx build \
+            --platform "$PLATFORM" \
+            --build-arg "VERSION=$VERSION" \
+            --build-arg "CHANNEL=$CHANNEL" \
+            --load \
+            --tag "deconz-gosu-runtime:$platform_tag" \
+            --file docker/Dockerfile \
+            docker
+
+      - name: Smoke runtime identity
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -Eeuo pipefail
+          platform_tag="${PLATFORM//\//-}"
+          image="deconz-gosu-runtime:$platform_tag"
+
+          run_case() (
+            set -Eeuo pipefail
+            name="$1"
+            non_root="$2"
+            expected_uid="$3"
+            expected_gid="$4"
+            suffix="${platform_tag}-${name}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+            container="gosu-runtime-${suffix}"
+            volume="gosu-runtime-data-${suffix}"
+
+            cleanup() {
+              docker logs "$container" || true
+              docker inspect "$container" || true
+              docker rm -f "$container" || true
+              docker volume rm -f "$volume" || true
+            }
+            trap cleanup EXIT
+
+            docker volume create "$volume" >/dev/null
+            docker run -d --name "$container" \
+              --volume "$volume:/opt/deCONZ" \
+              --publish 127.0.0.1::80 \
+              --env "NON_ROOT=$non_root" \
+              --env DECONZ_DEVICE=0 \
+              --env DECONZ_VNC_MODE=0 \
+              "$image" >/dev/null
+
+            deadline=$((SECONDS + 60))
+            until docker exec "$container" curl -fsS http://127.0.0.1:80/ >/dev/null 2>&1; do
+              if ! docker inspect --format '{{.State.Running}}' "$container" | grep -qx true; then
+                echo "Container exited before HTTP became ready" >&2
+                return 1
+              fi
+              if (( SECONDS >= deadline )); then
+                echo "Timed out waiting for HTTP readiness" >&2
+                return 1
+              fi
+              sleep 2
+            done
+
+            docker exec "$container" awk \
+              -v expected_uid="$expected_uid" \
+              -v expected_gid="$expected_gid" '
+                $1 == "Uid:" {
+                  uid_found = 1
+                  if (NF != 5) failed = 1
+                  for (i = 2; i <= 5; i++) if ($i != expected_uid) failed = 1
+                }
+                $1 == "Gid:" {
+                  gid_found = 1
+                  if (NF != 5) failed = 1
+                  for (i = 2; i <= 5; i++) if ($i != expected_gid) failed = 1
+                }
+                END { exit !(uid_found && gid_found) || failed }
+              ' /proc/1/status
+            if [ "$non_root" = 0 ]; then
+              docker exec "$container" awk '
+                $1 == "CapInh:" { inh_found = 1; if ($2 != "0000000000000000") failed = 1 }
+                $1 == "CapPrm:" { prm_found = 1; if ($2 != "0000000000000400") failed = 1 }
+                $1 == "CapEff:" { eff_found = 1; if ($2 != "0000000000000400") failed = 1 }
+                END { exit !(inh_found && prm_found && eff_found) || failed }
+              ' /proc/1/status
+            fi
+            docker exec "$container" sh -ec '
+              set -- $(tr "\\000" " " </proc/1/cmdline)
+              test "$1" = /usr/bin/deCONZ
+            '
+          )
+
+          run_case default 0 1000 1000
+          run_case root-fallback 1 0 0
