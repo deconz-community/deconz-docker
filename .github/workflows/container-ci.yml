@@ -97,8 +97,21 @@ jobs:
         uses: anchore/scan-action@v6
         with:
           image: ${{ env.IMAGE_TAG }}
+          output-format: table
+          output-file: ${{ runner.temp }}/grype-bookworm-${{ matrix.target.name }}.txt
+          by-cve: true
+          only-fixed: false
           severity-cutoff: high
           fail-build: true
+
+      - name: Upload vulnerability report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: grype-bookworm-${{ matrix.target.name }}
+          path: ${{ runner.temp }}/grype-bookworm-${{ matrix.target.name }}.txt
+          if-no-files-found: warn
+          retention-days: 14
 
   trixie-build-smoke-scan:
     name: Trixie / ${{ matrix.target.platform }}
@@ -185,8 +198,21 @@ jobs:
         uses: anchore/scan-action@v6
         with:
           image: ${{ env.IMAGE_TAG }}
+          output-format: table
+          output-file: ${{ runner.temp }}/grype-trixie-${{ matrix.target.name }}.txt
+          by-cve: true
+          only-fixed: false
           severity-cutoff: high
           fail-build: true
+
+      - name: Upload vulnerability report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: grype-trixie-${{ matrix.target.name }}
+          path: ${{ runner.temp }}/grype-trixie-${{ matrix.target.name }}.txt
+          if-no-files-found: warn
+          retention-days: 14
 
   bookworm-required:
     name: Bookworm required
