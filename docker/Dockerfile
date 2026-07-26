@@ -49,7 +49,7 @@ RUN . /etc/os-release && \
     esac && \
     apt-get update && \
     apt-get install -y \
-        gosu \
+        util-linux \
         curl \
         kmod \
         udev \

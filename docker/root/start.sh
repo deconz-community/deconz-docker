@@ -4,6 +4,13 @@ if [ "$DECONZ_START_VERBOSE" = 1 ]; then
   set -x
 fi
 
+as_deconz() {
+  if [ "$NON_ROOT" = 0 ]; then
+    setpriv --reuid=deconz --regid=deconz --init-groups --inh-caps=-all -- "$@"
+  else
+    "$@"
+  fi
+}
 
 echo "[deconzcommunity/deconz] Starting deCONZ..."
 echo "[deconzcommunity/deconz] Current deCONZ version: $DECONZ_VERSION"
@@ -25,12 +32,6 @@ DECONZ_OPTS="--auto-connect=1 \
         --http-port=$DECONZ_WEB_PORT \
         --https-port=$DECONZ_WEBS_PORT \
         --ws-port=$DECONZ_WS_PORT"
-
-if [ "$NON_ROOT" = 0 ]; then 
-  GOSU="gosu deconz"
-else
-  GOSU=""
-fi
 
 if [ "$DECONZ_BAUDRATE" != 0 ]; then
   DECONZ_OPTS="$DECONZ_OPTS --baudrate=$DECONZ_BAUDRATE"
@@ -121,8 +122,8 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   fi
 
   # Cleanup previous VNC session data
-  $GOSU tigervncserver -kill ':*'
-  $GOSU tigervncserver -list ':*' -cleanstale
+  as_deconz tigervncserver -kill ':*'
+  as_deconz tigervncserver -list ':*' -cleanstale
   for lock in "/tmp/.X${DECONZ_VNC_DISPLAY#:}-lock" "/tmp/.X11-unix/X${DECONZ_VNC_DISPLAY#:}"; do
     [ -e "$lock" ] || continue
     echo "[deconzcommunity/deconz] WARN - VNC-lock found. Deleting: $lock"
@@ -130,7 +131,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
   done
 
   # Set VNC security
-  $GOSU tigervncserver -SecurityTypes "$SECURITYTYPES" -PasswordFile $DECONZ_APPDATA_DIR/vnc/passwd "$DECONZ_VNC_DISPLAY"
+  as_deconz tigervncserver -SecurityTypes "$SECURITYTYPES" -PasswordFile $DECONZ_APPDATA_DIR/vnc/passwd "$DECONZ_VNC_DISPLAY"
 
   # Export VNC display variable
   export DISPLAY=$DECONZ_VNC_DISPLAY
@@ -159,7 +160,7 @@ if [ "$DECONZ_VNC_MODE" != 0 ]; then
     chown deconz:deconz $NOVNC_CERT
 
     #Start noVNC
-    $GOSU websockify -D --web=/usr/share/novnc/ --cert="$NOVNC_CERT" $DECONZ_NOVNC_PORT localhost:$DECONZ_VNC_PORT
+    as_deconz websockify -D --web=/usr/share/novnc/ --cert="$NOVNC_CERT" $DECONZ_NOVNC_PORT localhost:$DECONZ_VNC_PORT
     echo "[deconzcommunity/deconz] NOVNC port: $DECONZ_NOVNC_PORT"
   fi
 
@@ -181,4 +182,8 @@ ln -sfT $DECONZ_APPDATA_DIR/otau /home/deconz/otau
 chown deconz:deconz /home/deconz/otau
 chown deconz:deconz $DECONZ_APPDATA_DIR -R
 
-exec $GOSU /usr/bin/deCONZ $DECONZ_OPTS
+if [ "$NON_ROOT" = 0 ]; then
+  exec setpriv --reuid=deconz --regid=deconz --init-groups --inh-caps=-all -- /usr/bin/deCONZ $DECONZ_OPTS
+else
+  exec /usr/bin/deCONZ $DECONZ_OPTS
+fi
