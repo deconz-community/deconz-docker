@@ -1,4 +1,6 @@
-FROM debian:12-slim
+# Debian 12 Bookworm OCI image index. Dependabot keeps this reviewed digest current.
+ARG BASE_IMAGE=debian:12-slim@sha256:7b140f374b289a7c2befc338f42ebe6441b7ea838a042bbd5acbfca6ec875818
+FROM ${BASE_IMAGE}
 
 # Build arguments
 ARG VERSION
@@ -39,7 +41,13 @@ ENV DEBIAN_FRONTEND=noninteractive \
     NON_ROOT=0
 
 # Install deCONZ dependencies
-RUN apt-get update && \
+RUN . /etc/os-release && \
+    case "${VERSION_CODENAME}" in \
+        bookworm) deconz_packages="libqt5core5a libqt5gui5 libqt5network5 libqt5sql5 libqt5widgets5 libssl3" ;; \
+        trixie) deconz_packages="libqt5core5t64 libqt5gui5t64 libqt5network5t64 libqt5sql5t64 libqt5widgets5t64 libssl3t64" ;; \
+        *) echo "Unsupported Debian release codename: ${VERSION_CODENAME}" >&2; exit 1 ;; \
+    esac && \
+    apt-get update && \
     apt-get install -y \
         gosu \
         curl \
@@ -47,16 +55,11 @@ RUN apt-get update && \
         udev \
         libatomic1 \
         libcap2-bin \
-        libqt5core5a \
-        libqt5gui5 \
-        libqt5network5 \
         libqt5serialport5 \
-        libqt5sql5 \
         libqt5websockets5 \
-        libqt5widgets5 \
         libqt5qml5 \
-        libssl3 \
         libssl-dev \
+        openssl \
         lsof \
         sqlite3 \
         tigervnc-standalone-server \
@@ -65,7 +68,8 @@ RUN apt-get update && \
         websockify \
         openbox \
         xfonts-base \
-        xfonts-scalable && \
+        xfonts-scalable \
+        ${deconz_packages} && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -90,7 +94,10 @@ RUN groupadd -g ${DECONZ_GID} "deconz" && \
 # Add deCONZ, install deCONZ, make OTAU dir
 COPY download-deconz.sh /
 
-RUN chmod +x /download-deconz.sh && /download-deconz.sh ${VERSION} ${CHANNEL} ${TARGETPLATFORM}
+RUN test -n "${VERSION}" && \
+    test -n "${CHANNEL}" && \
+    chmod +x /download-deconz.sh && \
+    /download-deconz.sh ${VERSION} ${CHANNEL} ${TARGETPLATFORM}
 
 RUN dpkg -i /deconz.deb && \
     chown root:root /usr/bin/deCONZ* && \
