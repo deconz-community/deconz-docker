@@ -81,7 +81,7 @@ jobs:
 
             cleanup() {
               docker logs "$container" || true
-              docker inspect "$container" || true
+              docker inspect --format 'state={{.State.Status}} exit={{.State.ExitCode}} pid={{.State.Pid}} health={{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$container" || true
               docker rm -f "$container" || true
               docker volume rm -f "$volume" || true
             }
@@ -109,6 +109,12 @@ jobs:
               sleep 2
             done
 
+            docker exec "$container" sh -ec '
+              awk "/^(Uid|Gid|CapInh|CapPrm|CapEff):/ { print }" /proc/1/status
+              printf "Cmdline: "
+              tr "\\000" " " </proc/1/cmdline
+              printf "\n"
+            '
             docker exec "$container" awk \
               -v expected_uid="$expected_uid" \
               -v expected_gid="$expected_gid" '
