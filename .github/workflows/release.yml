@@ -9,12 +9,17 @@ on:
       - 'version.json'
   workflow_dispatch:
 
+concurrency:
+  group: release-image-publish
+  cancel-in-progress: false
+
 permissions:
   contents: read
   packages: write
 
 jobs:
   release-build:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -47,7 +52,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get version
-        id: version # ID veranderd naar 'version' voor duidelijkheid
+        id: version
         uses: actions/github-script@v8
         with:
           script: |
@@ -55,7 +60,7 @@ jobs:
             core.setOutput('prop', version);
 
       - name: Get channel
-        id: channel # Nieuwe stap om channel op te halen
+        id: channel
         uses: actions/github-script@v8
         with:
           script: |

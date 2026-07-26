@@ -3,15 +3,19 @@ name: Build and push dev image
 
 on:
   pull_request:
-    types: 
-      - opened      # Triggers when the PR is first created
-      - synchronize # Triggers whenever you push new commits to the PR branch
-      - reopened    # Triggers if you close and reopen the PR
+    types:
+      - opened
+      - synchronize
+      - reopened
       - labeled
     paths:
       - 'docker/**'
       - 'version.json'
   workflow_dispatch:
+
+concurrency:
+  group: dev-image-publish
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -19,7 +23,7 @@ permissions:
 
 jobs:
   dev-build:
-    if: success() && contains(github.event.pull_request.labels.*.name, 'Dev')
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'Dev')
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -51,7 +55,6 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Metadata ophalen is ook voor Dev essentieel voor het download-script
       - name: Get version
         id: version
         uses: actions/github-script@v8
@@ -75,7 +78,6 @@ jobs:
           file: ${{ matrix.dockerfile }}
           platforms: ${{ matrix.platforms }}
           push: true
-          # Hier voegen we de missende args weer toe
           build-args: |
             VERSION=${{ steps.version.outputs.prop }}
             CHANNEL=${{ steps.channel.outputs.prop }}
