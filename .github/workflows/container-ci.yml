@@ -1,0 +1,264 @@
+---
+name: Container build gate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: container-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate-grype-exceptions:
+    name: Validate Grype exceptions
+    runs-on: ubuntu-latest
+    outputs:
+      grype_config: ${{ steps.render.outputs.grype_config }}
+    steps:
+      - name: Checkout current workspace for bootstrap fallback
+        uses: actions/checkout@v7
+
+      - name: Checkout trusted policy
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+          path: policy
+
+      - name: Validate and render trusted policy
+        id: render
+        run: |
+          set -eu
+          policy_dir=policy
+          # Bootstrap only: base branch predates policy renderer.
+          if [ ! -f "$policy_dir/scripts/validate_grype_exceptions.py" ]; then
+            policy_dir=.
+          fi
+          python3 "$policy_dir/scripts/validate_grype_exceptions.py" --output "$RUNNER_TEMP/grype.yaml"
+          echo "grype_config=$(base64 -w 0 "$RUNNER_TEMP/grype.yaml")" >> "$GITHUB_OUTPUT"
+
+  bookworm-build-smoke-scan:
+    name: Bookworm / ${{ matrix.target.platform }}
+    runs-on: ubuntu-latest
+    needs: validate-grype-exceptions
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - name: amd64
+            platform: linux/amd64
+          - name: arm64
+            platform: linux/arm64
+          - name: armv7
+            platform: linux/arm/v7
+    env:
+      IMAGE_TAG: deconz-ci:bookworm-${{ matrix.target.name }}
+      CONTAINER_NAME: deconz-ci-bookworm-${{ matrix.target.name }}
+      APPDATA_VOLUME: deconz-ci-bookworm-${{ matrix.target.name }}-appdata
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Restore validated Grype config
+        run: |
+          rm -rf -- .grype.yaml .grype
+          printf '%s' '${{ needs.validate-grype-exceptions.outputs.grype_config }}' | base64 --decode > .grype.yaml
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Read build inputs
+        id: inputs
+        run: |
+          echo "version=$(jq -r '.version' version.json)" >> "$GITHUB_OUTPUT"
+          echo "channel=$(jq -r '.channel' version.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Build local image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./docker/
+          file: docker/Dockerfile
+          platforms: ${{ matrix.target.platform }}
+          load: true
+          push: false
+          tags: ${{ env.IMAGE_TAG }}
+          build-args: |
+            BASE_IMAGE=debian:12-slim@sha256:7b140f374b289a7c2befc338f42ebe6441b7ea838a042bbd5acbfca6ec875818
+            VERSION=${{ steps.inputs.outputs.version }}
+            CHANNEL=${{ steps.inputs.outputs.channel }}
+
+      - name: Smoke test container
+        run: |
+          set -eu
+          cleanup() {
+            docker logs "$CONTAINER_NAME" || true
+            docker inspect "$CONTAINER_NAME" || true
+            docker rm -f "$CONTAINER_NAME" || true
+            docker volume rm -f "$APPDATA_VOLUME" || true
+          }
+          trap cleanup EXIT
+
+          docker volume create "$APPDATA_VOLUME"
+          docker run -d --name "$CONTAINER_NAME" \
+            -p 127.0.0.1::80 \
+            -v "$APPDATA_VOLUME:/opt/deCONZ" \
+            -e DECONZ_DEVICE=0 \
+            -e DECONZ_VNC_MODE=0 \
+            -e DECONZ_UPNP=0 \
+            "$IMAGE_TAG"
+
+          for attempt in $(seq 1 48); do
+            if [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME")" != true ]; then
+              echo "Container stopped before becoming ready"
+              exit 1
+            fi
+            if docker exec "$CONTAINER_NAME" curl --fail --silent --show-error --max-time 10 http://127.0.0.1:80/ >/dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Container did not become HTTP-ready within four minutes"
+          exit 1
+
+      - name: Scan local image
+        uses: anchore/scan-action@v7
+        with:
+          image: ${{ env.IMAGE_TAG }}
+          output-format: table
+          output-file: ${{ runner.temp }}/grype-bookworm-${{ matrix.target.name }}.txt
+          by-cve: true
+          only-fixed: true
+          severity-cutoff: high
+          fail-build: true
+
+      - name: Upload vulnerability report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: grype-bookworm-${{ matrix.target.name }}
+          path: ${{ runner.temp }}/grype-bookworm-${{ matrix.target.name }}.txt
+          if-no-files-found: warn
+          retention-days: 14
+
+  trixie-build-smoke-scan:
+    name: Trixie / ${{ matrix.target.platform }}
+    runs-on: ubuntu-latest
+    needs: validate-grype-exceptions
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - name: amd64
+            platform: linux/amd64
+          - name: arm64
+            platform: linux/arm64
+          - name: armv7
+            platform: linux/arm/v7
+    env:
+      IMAGE_TAG: deconz-ci:trixie-${{ matrix.target.name }}
+      CONTAINER_NAME: deconz-ci-trixie-${{ matrix.target.name }}
+      APPDATA_VOLUME: deconz-ci-trixie-${{ matrix.target.name }}-appdata
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Restore validated Grype config
+        run: |
+          rm -rf -- .grype.yaml .grype
+          printf '%s' '${{ needs.validate-grype-exceptions.outputs.grype_config }}' | base64 --decode > .grype.yaml
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Read build inputs
+        id: inputs
+        run: |
+          echo "version=$(jq -r '.version' version.json)" >> "$GITHUB_OUTPUT"
+          echo "channel=$(jq -r '.channel' version.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Build local image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./docker/
+          file: docker/Dockerfile
+          platforms: ${{ matrix.target.platform }}
+          load: true
+          push: false
+          tags: ${{ env.IMAGE_TAG }}
+          build-args: |
+            BASE_IMAGE=debian:13-slim@sha256:020c0d20b9880058cbe785a9db107156c3c75c2ac944a6aa7ab59f2add76a7bd
+            VERSION=${{ steps.inputs.outputs.version }}
+            CHANNEL=${{ steps.inputs.outputs.channel }}
+
+      - name: Smoke test container
+        run: |
+          set -eu
+          cleanup() {
+            docker logs "$CONTAINER_NAME" || true
+            docker inspect "$CONTAINER_NAME" || true
+            docker rm -f "$CONTAINER_NAME" || true
+            docker volume rm -f "$APPDATA_VOLUME" || true
+          }
+          trap cleanup EXIT
+
+          docker volume create "$APPDATA_VOLUME"
+          docker run -d --name "$CONTAINER_NAME" \
+            -p 127.0.0.1::80 \
+            -v "$APPDATA_VOLUME:/opt/deCONZ" \
+            -e DECONZ_DEVICE=0 \
+            -e DECONZ_VNC_MODE=0 \
+            -e DECONZ_UPNP=0 \
+            "$IMAGE_TAG"
+
+          for attempt in $(seq 1 48); do
+            if [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME")" != true ]; then
+              echo "Container stopped before becoming ready"
+              exit 1
+            fi
+            if docker exec "$CONTAINER_NAME" curl --fail --silent --show-error --max-time 10 http://127.0.0.1:80/ >/dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Container did not become HTTP-ready within four minutes"
+          exit 1
+
+      - name: Scan local image
+        uses: anchore/scan-action@v7
+        with:
+          image: ${{ env.IMAGE_TAG }}
+          output-format: table
+          output-file: ${{ runner.temp }}/grype-trixie-${{ matrix.target.name }}.txt
+          by-cve: true
+          only-fixed: true
+          severity-cutoff: high
+          fail-build: true
+
+      - name: Upload vulnerability report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: grype-trixie-${{ matrix.target.name }}
+          path: ${{ runner.temp }}/grype-trixie-${{ matrix.target.name }}.txt
+          if-no-files-found: warn
+          retention-days: 14
+
+  bookworm-required:
+    name: Bookworm required
+    needs: bookworm-build-smoke-scan
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require Bookworm matrix success
+        run: |
+          test "${{ needs.bookworm-build-smoke-scan.result }}" = success
