@@ -139,8 +139,16 @@ jobs:
               ' /proc/1/status
             fi
             docker exec "$container" sh -ec '
-              set -- $(tr "\\000" " " </proc/1/cmdline)
-              test "$1" = /usr/bin/deCONZ
+              tr "\\000" "\n" </proc/1/cmdline | awk "
+                NR == 1 { argv0 = \$0 }
+                NR == 2 { argv1 = \$0 }
+                END {
+                  exit !(
+                    argv0 == \"/usr/bin/deCONZ\" ||
+                    (argv0 ~ \"^/usr/bin/qemu-[^/]+\$\" && argv1 == \"/usr/bin/deCONZ\")
+                  )
+                }
+              "
             '
           )
 
